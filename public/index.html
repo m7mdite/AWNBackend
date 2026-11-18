@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="blue">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>أسناني</title>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== الثيمات: نفس قيم AppColors في التطبيق ===== */
+:root,[data-theme="blue"]{--pr:#2196f3;--ac:#448aff;--lt:#40c4ff;--bg:#fff;--card:#fff;--tx:#000000de;--t2:#0000008a;--bd:#e0e0e0;--on:#fff}
+[data-theme="dark"]{--pr:#000;--ac:#b0bec5;--lt:#9fa8da;--bg:#121212;--card:#242424;--tx:#fff;--t2:#ffffffb3;--bd:#ffffff3d;--on:#121212}
+[data-theme="pink"]{--pr:#e91e63;--ac:#ff4081;--lt:#f8bbd0;--bg:#fff5f8;--card:#ffecf2;--tx:#000000de;--t2:#0000008a;--bd:#f8bbd0;--on:#fff}
+:root{--wait:#ffb300;--done:#2e9e5b;--rej:#e5484d;--sh:0 4px 14px #0003;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[data-theme="dark"]{color-scheme:dark}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;min-height:100%;font-family:"Tajawal",system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--ac);z-index:30}
+/* صور الخلفية: نفس AppImages.authBackground لكل ثيم. ضعها في images/images_asnan/ */
+.bg{position:fixed;inset:0;z-index:-1;background:linear-gradient(160deg,var(--ac),var(--lt) 55%,var(--bg))}
+[data-theme="blue"] .bg{background:url("images/images_asnan/back_blue.png") center/cover,linear-gradient(160deg,var(--ac),var(--lt) 55%,var(--bg))}
+[data-theme="dark"] .bg{background:url("images/images_asnan/back_dark.png") center/cover,linear-gradient(160deg,#37474f,#121212)}
+[data-theme="pink"] .bg{background:url("images/images_asnan/back_pink.png") center/cover,linear-gradient(160deg,var(--ac),var(--lt) 55%,var(--bg))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--ac);color:var(--on)}
+header h1{flex:1;margin:0;font-size:1.15rem}
+.ib,.dl{border:0;border-radius:20px;background:#ffffff33;color:var(--on);font:inherit;font-size:.85rem;padding:8px 12px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.th{display:flex;gap:6px}.th i{width:20px;height:20px;border-radius:50%;border:2px solid #fff;cursor:pointer}
+.layout{display:flex;max-width:1100px;margin:0 auto}
+nav{position:fixed;bottom:0;inset-inline:0;z-index:15;display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));background:linear-gradient(var(--ac),var(--lt),#ffffff8a,#fff);}
+[data-theme="dark"] nav{background:linear-gradient(#b0bec5,#9fa8da,#37474f,#121212)}
+nav button{flex:1;border:0;background:none;font:inherit;font-size:.72rem;color:#000000a0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;cursor:pointer}
+nav button span{font-size:1.3rem}nav button.on{color:var(--pr);font-weight:700}
+[data-theme="dark"] nav button.on{color:#000}
+main{flex:1;min-width:0;padding:14px 14px 150px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;box-shadow:var(--sh);padding:16px;margin-bottom:14px}
+.stats{background:linear-gradient(135deg,var(--ac),var(--pr));color:#fff;border:0}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin-top:12px}
+.row3 b{display:block;font-size:1.5rem}.row3 small{opacity:.85}
+.top{display:flex;justify-content:space-between;align-items:center;font-weight:700;gap:8px}
+.adv{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:6px;scrollbar-width:none}
+.adv div{flex:0 0 100%;scroll-snap-align:center;height:150px;border-radius:18px;color:#fff;display:flex;align-items:flex-end;padding:12px;font-weight:700;background:var(--pr) center/cover;box-shadow:var(--sh)}
+.adv span{background:#0008;border-radius:10px;padding:4px 10px}
+.posts{display:grid;gap:12px;grid-template-columns:1fr}
+.who{display:flex;gap:8px;align-items:center;color:var(--t2);font-size:.9rem;margin-bottom:6px}
+.av{width:30px;height:30px;border-radius:50%;background:var(--lt);display:grid;place-items:center;overflow:hidden;flex:none}.av img{width:100%;height:100%;object-fit:cover}
+.pimg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin:8px 0}.pimg img{width:100%;height:140px;object-fit:cover;border-radius:12px}
+.meta{display:flex;gap:10px;color:var(--t2);font-size:.85rem}
+.meta button{border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
+.tabs button{flex:0 0 auto;border:1px solid var(--bd);background:var(--card);color:var(--t2);font:inherit;padding:8px 14px;border-radius:16px;cursor:pointer}
+.tabs button.on{background:var(--ac);color:var(--on);border-color:var(--ac)}
+.req{display:flex;gap:12px;align-items:center}.dot{width:10px;height:10px;border-radius:50%;flex:none}.grow{flex:1;min-width:0}
+small,.mut{color:var(--t2)}.empty{text-align:center;color:var(--t2);padding:34px 10px}
+.btn,.fab button{font:inherit;cursor:pointer;border-radius:22px;padding:11px 20px;border:1.5px solid var(--pr);background:var(--card);color:var(--pr);font-weight:700}
+[data-theme="dark"] .btn,[data-theme="dark"] .fab button{border-color:var(--ac);color:var(--ac)}
+.btn.fill{background:var(--pr);color:#fff;border-color:var(--pr)}[data-theme="dark"] .btn.fill{background:var(--ac);color:#000}
+.btn:disabled{opacity:.5}
+.fab{position:fixed;inset-inline:0;bottom:calc(76px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:14;pointer-events:none}
+.fab button{pointer-events:auto;box-shadow:0 0 8px var(--ac)}
+.list button{display:flex;width:100%;gap:12px;align-items:center;border:0;background:none;color:inherit;font:inherit;padding:14px 4px;border-bottom:1px solid var(--bd);cursor:pointer;text-align:start}
+.list button:last-child{border:0}
+dialog{border:0;border-radius:20px;padding:20px;width:min(94vw,480px);max-height:90vh;background:var(--card);color:var(--tx);box-shadow:0 10px 40px #0006}
+dialog::backdrop{background:#0007}dialog h2{margin:0 0 8px;font-size:1.15rem}
+label{display:block;font-size:.88rem;margin:10px 0 4px;color:var(--t2)}
+input,select,textarea{width:100%;font:inherit;padding:10px 12px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
+input[type=range]{padding:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.acts{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.auth{max-width:440px;margin:0 auto}
+.out{margin-top:10px;padding:10px;border-radius:12px;background:var(--bg);font-size:.85rem;border:1px dashed var(--bd)}
+.toast{position:fixed;inset-inline:0;bottom:calc(140px + env(safe-area-inset-bottom,0px));margin:auto;width:max-content;max-width:90vw;background:#14233a;color:#fff;padding:10px 18px;border-radius:20px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none}.toast.show{opacity:1}
+@media(min-width:900px){
+ nav{position:sticky;top:calc(58px + env(safe-area-inset-top,0px));inset:auto;flex-direction:column;gap:6px;width:200px;height:max-content;margin:14px 0 0 14px;padding:10px;border-radius:18px;box-shadow:var(--sh);align-self:flex-start;background:var(--card)!important}
+ nav button{flex:none;flex-direction:row;gap:10px;font-size:.95rem;padding:12px 14px;color:var(--t2)}nav button.on{color:var(--pr)!important}
+ main{padding-bottom:110px}.fab{bottom:24px}.posts{grid-template-columns:1fr 1fr}.adv div{flex-basis:calc(50% - 6px)}.toast{bottom:90px}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<header>
+  <h1>أسناني</h1>
+  <div class="th" aria-label="الثيم"><i data-t="blue" style="background:#448aff"></i><i data-t="dark" style="background:#121212"></i><i data-t="pink" style="background:#ff4081"></i></div>
+  <a class="dl" id="dlTop" download>⬇ تحميل التطبيق</a>
+</header>
+<div class="layout"><nav id="nav"></nav><main id="main"></main></div>
+<div class="fab" id="fab"><button data-a="newreq">➕ تقديم طلب علاج</button></div>
+
+<dialog id="lockD"><h2>تنبيه</h2><p>هذه الميزة متاحة فقط للمستخدمين المسجلين.</p>
+ <div class="acts"><button class="btn" data-a="close">إلغاء</button><button class="btn fill" data-a="login">تسجيل الدخول</button></div></dialog>
+<dialog id="reqD"></dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== إعدادات: عدّلها فقط ===== */
+const CFG={API:"http://localhost:5000/api",APK:"app-release.apk"};
+const $=s=>document.querySelector(s);
+const h=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const url=u=>/^https?:\/\//.test(u||"")?h(u):"";
+const LS={g:k=>{try{return localStorage.getItem(k)}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},d:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+const S={tab:0,view:"app",mode:"login",rt:0,dash:null,reqs:{},posts:[],page:1,pages:1,treat:[],token:LS.g("token"),user:JSON.parse(LS.g("user")||"null")};
+const TABS=[["🏠","الصفحة الرئيسية"],["📋","الطلبات"],["📰","المنشورات"],["👤","الملف الشخصي"]];
+const RT=["قيد الإنتظار","قيد المعالجة","تمت معالجتها","تم رفضها"],RE=["pending","processing","finished","rejected"],RC=["var(--wait)","var(--ac)","var(--done)","var(--rej)"];
+$("#dlTop").href=CFG.APK;
+const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2600)};
+const setTheme=t=>{document.documentElement.dataset.theme=t;LS.s("app_theme",t)};setTheme(LS.g("app_theme")||"blue");
+
+/* ===== الشبكة: نفس Crud.dart (توكن + مهلة + تمييز الأخطاء + 401) ===== */
+async function api(path,{method="GET",body,form,auth=true,ms=20000}={}){
+  const hd={Accept:"application/json"};
+  if(S.token)hd.Authorization="Bearer "+S.token;
+  let bd;if(form){bd=form}else if(body){hd["Content-Type"]="application/json";bd=JSON.stringify(body)}
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),ms);
+  try{
+    const r=await fetch(CFG.API+path,{method,headers:hd,body:bd,signal:ctl.signal});
+    let d;try{d=await r.json()}catch(e){return{ok:false,msg:"رد غير صالح من الخادم"}}
+    if(r.ok)return{ok:true,d};
+    if(r.status===401&&auth&&S.token){endSession("انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى")}
+    return{ok:false,msg:d.message||"فشل في الاتصال بالخادم",st:r.status};
+  }catch(e){return{ok:false,msg:e.name==="AbortError"?"انتهت مهلة الاتصال":"لا يوجد اتصال بالإنترنت أو تعذر الاتصال بالخادم"}}
+  finally{clearTimeout(to)}
+}
+function endSession(m){["token","user"].forEach(LS.d);S.token=null;S.user=null;S.tab=0;S.reqs={};S.view="app";render();loadHome();if(m)toast(m)}
+
+/* ===== التحميل ===== */
+async function loadHome(){const r=await api("/dashboard");S.dash=r.ok?r.d.data:{err:r.msg};if(S.tab===0&&S.view==="app")render()}
+async function loadReqs(i){if(!S.token)return;const r=await api("/request/"+RE[i]);S.reqs[i]=r.ok?(r.d.data||[]):{err:r.msg};if(S.tab===1&&S.rt===i)render()}
+async function loadPosts(more){if(!S.token)return;const p=more?S.page+1:1;const r=await api(`/posts?page=${p}&limit=10&sort=createdAt&order=desc`);
+  if(!r.ok)return toast(r.msg);S.page=p;S.pages=r.d.pagination?.total_pages||1;S.posts=more?S.posts.concat(r.d.data||[]):(r.d.data||[]);if(S.tab===2)render()}
+
+/* ===== العرض ===== */
+let postCard=p=>`<article class="card"><div class="who"><span class="av">${url(p.publisher?.profile_photo)?`<img src="${url(p.publisher.profile_photo)}" alt="">`:"👤"}</span>${h(p.publisher?.full_name||"")}${p.publisher?.is_verified?" ✔️":""}</div>
+<div>${h(p.content)}</div>${(p.images||[]).length?`<div class="pimg">${p.images.map(i=>`<img loading="lazy" src="${url(i.url)}" alt="">`).join("")}</div>`:""}
+<div class="meta"><button data-a="like" data-id="${h(p._id)}">👍 ${p.count_likes||0}</button><button data-a="dislike" data-id="${h(p._id)}">👎 ${p.count_dislikes||0}</button><span>💬 ${p.count_comments||0}</span></div></article>`;
+function home(){const d=S.dash;
+  if(!d)return `<div class="card empty">جاري التحميل…</div>`;
+  if(d.err)return `<div class="card empty">${h(d.err)}<br><br><button class="btn" data-a="reload">إعادة المحاولة</button></div>`;
+  const q=d.requests||{},u=d.users,m=d.my_cases;
+  return `<section class="card stats"><div class="top"><span>📊 طلبات العلاج</span><small style="color:#fff">الإجمالي: ${q.total??0}</small></div>
+<div class="row3"><div><b>${q.pending??0}</b><small>انتظار</small></div><div><b>${q.processing??0}</b><small>معالجة</small></div><div><b>${q.finished??0}</b><small>مكتملة</small></div></div>
+${u?`<div style="margin-top:12px;font-size:.85rem">👤 عدد المستخدمين الكلي: <b>${u.count_users??0}</b></div>`:""}
+${m&&S.token?`<div style="margin-top:6px;font-size:.85rem">حالاتي: انتظار ${m.pending??0} · معالجة ${m.in_process??0} · مكتملة ${m.finished??0}</div>`:""}</section>
+<section class="card top" style="flex-wrap:wrap"><span>📱 حمّل تطبيق أسناني على أندرويد</span><a class="btn fill" href="${h(CFG.APK)}" download style="text-decoration:none">⬇ تحميل التطبيق</a></section>
+${(d.adv?.data||[]).length?`<div class="adv">${d.adv.data.map(a=>`<div style="${url(a.image?.url)?`background-image:url('${url(a.image.url)}')`:""}"><span>${h(a.content)}</span></div>`).join("")}</div>`:""}
+${(d.top_posts?.data||[]).length?`<div class="top" style="margin:16px 4px 10px"><span>أفضل المنشورات</span><button class="btn" style="padding:4px 14px" data-a="tab" data-i="2">عرض الكل</button></div><div class="posts">${d.top_posts.data.map(postCard).join("")}</div>`:""}`}
+function reqs(){const l=S.reqs[S.rt];
+  return `<div class="top" style="margin:0 4px 10px"><span>طلباتي</span><button class="btn" style="padding:4px 14px" data-a="rr">تحديث</button></div>
+<div class="tabs">${RT.map((t,i)=>`<button class="${i===S.rt?"on":""}" data-a="rt" data-i="${i}">${t}</button>`).join("")}</div>`+
+  (!l?`<div class="card empty">جاري التحميل…</div>`:l.err?`<div class="card empty">${h(l.err)}</div>`:!l.length?`<div class="card empty">لا توجد طلبات هنا</div>`:
+  l.map(r=>{const q=r.Requestion||{},ct=r.case_type?.case_type||r.case_type||"";const st=[r.student,r.overseer].find(x=>x)?.first_name;
+   return `<div class="card req"><span class="dot" style="background:${RC[S.rt]}"></span><div class="grow"><b>${h(typeof ct==="string"?ct:"")}</b><br><small>السن ${h(q.tooth_location||"-")} · عمر ${h(q.age||"-")}${st?" · الطالب: "+h(st):""}</small>${r.rating?`<br><small>⭐ ${h(r.rating)}</small>`:""}</div><small>${RT[S.rt]}</small></div>`}).join(""))}
+function posts(){return `<div class="posts">${S.posts.map(postCard).join("")||'<div class="card empty">لا توجد منشورات</div>'}</div>${S.page<S.pages?`<div style="text-align:center;margin:10px"><button class="btn" data-a="more">عرض المزيد</button></div>`:""}`}
+function prof(){const u=S.user||{};const n=[u.first_name,u.father_name,u.last_name].filter(Boolean).join(" ");
+  return `<section class="card"><div class="who" style="font-size:1.05rem;color:var(--tx)"><span class="av" style="width:56px;height:56px;font-size:1.6rem">${url(u.profile_photo?.url)?`<img src="${url(u.profile_photo.url)}" alt="">`:"👤"}</span><div><b>${h(n)}</b><br><small>${h(u.email||"")}</small></div></div></section>
+<section class="card list"><button data-a="th">🎨 تبديل الثيم</button><button data-a="out">🚪 تسجيل الخروج</button></section>`}
+function auth(){const L=S.mode==="login",f=(id,l,t="text")=>`<label>${l}</label><input id="${id}" type="${t}" autocomplete="off">`;
+  return `<div class="auth card"><h2>${L?"تسجيل الدخول":"إنشاء حساب جديد"}</h2>${L?"":f("fn","الاسم")+f("fa","اسم الأب")+f("ln","الكنية")+`<label>الجنس</label><select id="ge"><option value="male">ذكر</option><option value="female">أنثى</option></select>`}
+${f("em","البريد الإلكتروني","email")}${f("pw","كلمة المرور","password")}
+<div class="acts" style="justify-content:space-between"><button class="btn" data-a="mode">${L?"إنشاء حساب":"لدي حساب"}</button><button class="btn fill" id="go" data-a="submitAuth">${L?"دخول":"تسجيل"}</button></div>
+<div style="margin-top:10px"><button class="btn" data-a="guest" style="width:100%">المتابعة كضيف</button></div></div>`}
+function render(){
+  $("#nav").style.display=S.view==="auth"?"none":"";
+  $("#nav").innerHTML=TABS.map((t,i)=>`<button class="${i===S.tab?"on":""}" data-a="tab" data-i="${i}"><span>${t[0]}</span>${t[1]}</button>`).join("");
+  $("#main").innerHTML=S.view==="auth"?auth():[home,reqs,posts,prof][S.tab]();
+  $("#fab").style.display=S.view==="app"&&S.token&&S.tab<2?"flex":"none";
+}
+function go(i){if(!S.token&&i!==0)return $("#lockD").showModal();S.tab=i;render();scrollTo({top:0});
+  if(i===0)loadHome();if(i===1)loadReqs(S.rt);if(i===2)loadPosts()}
+
+/* ===== المصادقة: نفس login_controller / register_controller ===== */
+async function submitAuth(){const v=i=>$("#"+i)?.value.trim(),L=S.mode==="login",b=$("#go");
+  if(!v("em")||!v("pw"))return toast("الرجاء ملء جميع الحقول");
+  if(!L&&(!v("fn")||!v("fa")||!v("ln")))return toast("الرجاء ملء جميع الحقول");
+  b.disabled=true;
+  const r=L?await api("/auth/login",{method:"POST",body:{email:v("em"),password:v("pw")},auth:false})
+    :await api("/auth/register",{method:"POST",body:{email:v("em"),password:v("pw"),first_name:v("fn"),father_name:v("fa"),last_name:v("ln"),gender:v("ge"),role:"patient"},auth:false});
+  b.disabled=false;
+  if(!r.ok)return toast(r.msg);
+  if(r.d.status&&r.d.status!=="success")return toast(r.d.message||"حدث خطأ غير معروف");
+  if(!L){S.mode="login";render();$("#em").value=v("em")||"";return toast("تم إنشاء الحساب، سجّل الدخول الآن")}
+  const u=r.d.data;if(u.role!=="patient")return toast(u.role==="student"?"هذا الموقع مخصص للمرضى، استخدم التطبيق للطلاب":"هذا التطبيق غير مخصص لك");
+  S.token=r.d.token;S.user=u;LS.s("token",S.token);LS.s("user",JSON.stringify(u));S.view="app";S.tab=0;render();loadHome();toast("اهلا بك "+(u.first_name||""));
+}
+
+/* ===== نموذج طلب العلاج: نفس مفاتيح treatment_request_model.toJson ===== */
+async function openReq(){
+  if(!S.treat.length){const r=await api("/admin/treatment");if(r.ok)S.treat=(r.d.data||[]).map(t=>{const c=(t.case_type&&typeof t.case_type==="object")?t.case_type:t;return{id:c._id||t._id,n:c.case_type||c.name||""}})}
+  const yn=id=>`<select id="${id}"><option value="">اختر</option><option value="1">نعم</option><option value="0">لا</option></select>`;
+  $("#reqD").innerHTML=`<h2>تقديم طلب علاج</h2>
+<label>اختر نوع المعالجة</label><select id="ct"><option value="">اختر</option>${S.treat.map(t=>`<option value="${h(t.id)}">${h(t.n)}</option>`).join("")}</select>
+<div class="two"><div><label>عمر المريض</label><input id="age" type="number" min="1" max="110" inputmode="numeric"></div>
+<div><label>الجنس</label><select id="ge2"><option value="">اختر</option><option value="male">ذكر</option><option value="female">أنثى</option></select></div></div>
+<div id="preg" hidden><label>هل أنت حامل؟</label>${yn("pg")}</div>
+<label>شدة الألم: <b id="sv">0</b> / 10</label><input id="sev" type="range" min="0" max="10" value="0">
+<div id="ptw" hidden><label>متى يحصل الألم؟</label><input id="pt"></div>
+<label>رقم السن</label><input id="tl" placeholder="مثال: 16" inputmode="numeric">
+<label>هل عولج هذا السن من قبل؟</label>${yn("prev")}
+<label>أمراض مزمنة؟</label>${yn("chr")}<input id="chn" placeholder="اذكر اسم المرض" hidden>
+<label>أدوية أو مكملات؟</label>${yn("med")}<input id="men" placeholder="اذكر اسم الدواء أو المكمل" hidden>
+<label>إرفاق صورة للسن</label><input id="ph" type="file" accept="image/*">
+<label>ملاحظات</label><textarea id="nt" rows="2"></textarea>
+<div class="acts" style="justify-content:flex-start"><button class="btn" data-a="p1">هل يمكن علاجها؟</button><button class="btn" data-a="p2">نوع المعالجة المتوقع</button></div>
+<div class="out" id="out">التنبؤات اختيارية وهي تقدير مبدئي وليست تشخيصاً طبياً.</div>
+<div class="acts"><button class="btn" data-a="close">إلغاء</button><button class="btn fill" id="snd" data-a="send">إرسال</button></div>`;
+  $("#reqD").showModal();
+}
+document.addEventListener("input",e=>{const t=e.target;
+  if(t.id==="sev"){$("#sv").textContent=t.value;$("#ptw").hidden=t.value==="0"}});
+document.addEventListener("change",e=>{const t=e.target;
+  if(t.id==="ge2")$("#preg").hidden=t.value!=="female";
+  if(t.id==="chr")$("#chn").hidden=t.value!=="1";
+  if(t.id==="med")$("#men").hidden=t.value!=="1"});
+function payload(needType){const g=i=>$("#"+i).value.trim(),sev=+g("sev"),gen=g("ge2");
+  if(needType&&!g("ct")){toast("الرجاء اختيار نوع المعالجة");return}
+  if(!g("age")){toast("الرجاء إدخال العمر أولاً");return}
+  if(!gen){toast("الرجاء تحديد الجنس أولاً");return}
+  if(sev>0&&!g("pt")){toast("الرجاء تحديد وقت الألم أولاً");return}
+  if(!g("tl")){toast("الرجاء إدخال موقع/رقم السن أولاً");return}
+  if(!g("prev")){toast("حدد في ما إذا قمت بمعالجة هذا السن من قبل أم لا");return}
+  const p={pain_severity:sev,tooth_location:g("tl"),gender:gen,previous_treatment:g("prev")==="1",age:g("age")};
+  if(g("ct"))p.case_type=g("ct");if(sev>0)p.pain_time=g("pt");
+  if(gen==="female"&&g("pg"))p.is_pregnant=g("pg")==="1";
+  if(g("chr")==="1"&&g("chn"))p.chronic_diseases=g("chn");
+  if(g("med")==="1"&&g("men"))p.medicines=g("men");
+  if(g("nt"))p.notes=g("nt");return p}
+const toForm=(p,field,file)=>{const f=new FormData();for(const k in p)f.append(k,String(p[k]));if(file)f.append(field,file);return f};
+async function sendReq(){const p=payload(true);if(!p)return;const b=$("#snd"),file=$("#ph").files[0];b.disabled=true;
+  const r=file?await api("/request",{method:"POST",form:toForm(p,"photo",file),ms:60000}):await api("/request",{method:"POST",body:p});b.disabled=false;
+  if(!r.ok)return toast(r.msg||"فشل في إرسال الطلب. الرجاء المحاولة مرة أخرى");
+  $("#reqD").close();toast("تم إرسال الطلب بنجاح");S.reqs={};S.tab=1;S.rt=0;render();loadReqs(0);loadHome()}
+async function predict(kind){const p=payload(false);if(!p)return;const o=$("#out");o.textContent="جاري التنبؤ…";let r;
+  if(kind===1)r=await api("/ml/predict",{method:"POST",body:p});
+  else{const q={age:p.age,gender:p.gender,pain_severity:p.pain_severity,pain_time:p.pain_time||"",tooth_location:p.tooth_location,is_pregnant:!!p.is_pregnant,previous_treatment:p.previous_treatment,takes_medication:!!p.medicines,medication_type:0};
+    r=await api("/treatment-ml/predict-with-image",{method:"POST",form:toForm(q,"image",$("#ph").files[0]),ms:60000})}
+  if(!r.ok||!r.d.data){o.textContent="تعذر التنبؤ، حاول مرة أخرى";return}
+  const d=r.d.data,c=d.confidence!=null?` (الثقة ${Math.round(d.confidence*(d.confidence<=1?100:1))}%)`:"";
+  o.textContent=(kind===1?"هل يمكن علاجها؟ ":"نوع المعالجة المتوقع: ")+(d.prediction||d.case_type||d.predicted_case_type||JSON.stringify(d))+c+" — تقدير مبدئي وليس تشخيصاً."}
+
+/* ===== الأحداث ===== */
+document.addEventListener("click",async e=>{
+  const th=e.target.closest("[data-t]");if(th)return setTheme(th.dataset.t);
+  const t=e.target.closest("[data-a]");if(!t)return;const a=t.dataset.a,i=+t.dataset.i;
+  if(a==="tab")go(i);
+  else if(a==="rt"){S.rt=i;render();if(!S.reqs[i])loadReqs(i)}
+  else if(a==="rr"){S.reqs[S.rt]=null;render();loadReqs(S.rt)}
+  else if(a==="reload"){S.dash=null;render();loadHome()}
+  else if(a==="more")loadPosts(true);
+  else if(a==="close")t.closest("dialog").close();
+  else if(a==="login"){$("#lockD").close();S.view="auth";S.mode="login";render()}
+  else if(a==="mode"){S.mode=S.mode==="login"?"register":"login";render()}
+  else if(a==="guest"){S.view="app";render()}
+  else if(a==="submitAuth")submitAuth();
+  else if(a==="newreq")openReq();
+  else if(a==="send")sendReq();
+  else if(a==="p1")predict(1);else if(a==="p2")predict(2);
+  else if(a==="th"){const o=["blue","dark","pink"];setTheme(o[(o.indexOf(document.documentElement.dataset.theme)+1)%3])}
+  else if(a==="out"){await api("/auth/logout",{method:"POST",body:{},auth:false,ms:5000});endSession()}
+  else if(a==="like"||a==="dislike"){const r=await api(`/posts/${t.dataset.id}/${a}`,{method:"POST",body:{}});if(r.ok)loadPosts();else toast(r.msg)}
+});
+S.view==="app"&&render();loadHome();if(S.token)loadReqs(0);
+</script>
+<script>
+/* ===== الجزء الثاني: الذكاء الاصطناعي، المحادثات، الإشعارات، التعليقات، المنشورات، الملف الشخصي، تفاصيل الطلب ===== */
+const SB=CFG.API.replace(/\/api\/?$/,"");
+let WS=null,CHAT=null,CMID=null,AIL=[],N=JSON.parse(LS.g("notifs")||"[]");
+const xD=document.createElement("dialog");xD.id="xD";document.body.appendChild(xD);
+const dlg=(t,b,acts="")=>{xD.innerHTML=`<h2>${t}</h2>${b}<div class="acts"><button class="btn" data-a="close">إغلاق</button>${acts}</div>`;if(!xD.open)xD.showModal()};
+const needLogin=()=>{if(S.token)return false;$("#lockD").showModal();return true};
+const row=(k,v)=>v||v===0?`<div class="top" style="font-weight:400;padding:5px 0;border-bottom:1px solid var(--bd)"><small>${k}</small><span style="text-align:start">${h(v)}</span></div>`:"";
+const bar=(id,ph,a)=>`<div class="two" style="grid-template-columns:1fr auto;margin-top:10px"><input id="${id}" placeholder="${ph}"><button class="btn fill" data-a="${a}">إرسال</button></div>`;
+document.querySelector("header .th").insertAdjacentHTML("beforebegin",`<button class="ib" data-a="ai" aria-label="المساعد">🤖</button><button class="ib" data-a="convs" aria-label="المحادثات">💬</button><button class="ib" data-a="notifs" aria-label="الإشعارات">🔔<b id="bd"></b></button>`);
+const bd=()=>{const n=N.filter(x=>!x.r).length;$("#bd").textContent=n?" "+n:""};bd();
+
+/* --- الإشعارات + Socket.io (نفس أحداث websocket_events.dart) --- */
+function pushN(t,d){d=d&&typeof d==="object"?d:{};const s=v=>typeof v==="string"?v:"";
+  const x={title:s(d.title)||(t==="requestAccepted"?"تم قبول طلبك":t==="VerifyAccepted"?"تم قبول توثيقك":"إشعار جديد"),body:s(d.body)||s(d.message),type:t,t:Date.now(),r:0};
+  N.unshift(x);N=N.slice(0,50);LS.s("notifs",JSON.stringify(N));bd();toast(x.title);
+  if(t==="requestAccepted"||t==="updatecasetype"){S.reqs={};if(S.tab===1&&S.view==="app")loadReqs(S.rt)}}
+function connectWS(){if(WS||typeof io==="undefined"||!S.token||!S.user)return;
+  WS=io(SB||undefined,{transports:["websocket"],query:{userId:S.user._id}});
+  WS.on("connect",()=>WS.emit("registerPatient",S.user._id));
+  ["notify","requestAccepted","VerifyAccepted","updatecasetype"].forEach(ev=>WS.on(ev,d=>pushN(ev,d)));
+  WS.on("send_message",d=>{if(xD.open&&CHAT)chatLoad();else pushN("message",{title:"رسالة جديدة"})})}
+const _render=render;render=function(){_render();connectWS()};
+const _end=endSession;endSession=function(m){if(WS){WS.disconnect();WS=null}N=[];LS.d("notifs");bd();_end(m)};
+function notifs(){if(needLogin())return;N.forEach(x=>x.r=1);LS.s("notifs",JSON.stringify(N));bd();
+  dlg("🔔 الإشعارات",N.length?N.map(x=>`<div class="card" style="margin:6px 0"><b>${h(x.title)}</b><br><small>${h(x.body)}</small><br><small>${new Date(x.t).toLocaleString("ar")}</small></div>`).join(""):'<div class="empty">لا توجد إشعارات</div>')}
+
+/* --- المساعد الذكي: /ai/chat و/ai/history --- */
+const aiDraw=()=>{const b=$("#aiL");if(!b)return;b.innerHTML=AIL.map(m=>`<div class="card" style="margin:6px 0;padding:10px 14px;${m.role==="user"?"background:var(--ac);color:var(--on)":""}">${h(m.content)}</div>`).join("");b.scrollTop=b.scrollHeight};
+async function aiOpen(){if(needLogin())return;dlg("🤖 المساعد الذكي",`<div id="aiL" style="max-height:50vh;overflow:auto"></div>`+bar("aiI","اكتب رسالتك…","aiS"),`<button class="btn" data-a="aiC">مسح السجل</button>`);
+  const r=await api("/ai/history?limit=50");AIL=(r.ok?r.d.data||[]:[]).map(m=>({role:m.role,content:m.content}));
+  if(!AIL.length)AIL=[{role:"assistant",content:"أهلاً بك 🦷\n\nأعلم أن زيارة طبيب الأسنان تسبب قلقاً للبعض، لكنني هنا لمساعدتك.\nأخبرني ما هي مشكلتك وسأشرح لك كل خطوة بطريقة مريحة."}];aiDraw()}
+async function aiSend(){const i=$("#aiI"),t=i.value.trim();if(!t)return;i.value="";AIL.push({role:"user",content:t},{role:"assistant",content:"…"});aiDraw();
+  const r=await api("/ai/chat",{method:"POST",body:{message:t},ms:130000});AIL.pop();
+  AIL.push({role:"assistant",content:r.ok?(r.d.data?.reply?.content||"لم أستطع فهم طلبك."):(r.msg||"حدث خطأ")});aiDraw()}
+
+/* --- المحادثات: /conversations --- */
+async function convs(){if(needLogin())return;dlg("💬 المحادثات",'<div id="cl" class="empty">جاري التحميل…</div>');
+  const r=await api("/conversations"),l=r.ok?(r.d.data||[]):[],c=$("#cl");if(!c)return;c.className="";
+  c.innerHTML=l.length?l.map(v=>{const o=v.otherPartyProfile||{};return `<button class="card" style="width:100%;text-align:start;margin:6px 0;color:inherit;font:inherit;cursor:pointer" data-a="chat" data-id="${h(o.userId)}" data-n="${h(o.full_name)}"><b>${h(o.full_name)}</b><br><small>${h(v.last_message)}</small></button>`}).join(""):'<div class="empty">لا توجد محادثات</div>'}
+async function chat(id,n){CHAT={id,cid:null};dlg("💬 "+h(n),`<div id="cm" style="max-height:50vh;overflow:auto"></div>`+bar("ci","اكتب رسالة…","cs"),`<button class="btn" data-a="convs">القائمة</button>`);await chatLoad()}
+async function chatLoad(){const r=await api("/conversations/"+CHAT.id);if(!r.ok)return toast(r.msg);const d=r.d.data||{};CHAT.cid=d.conversationId||d._id||CHAT.cid;
+  const m=(d.messages||[]).slice().sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt)),b=$("#cm");if(!b)return;
+  b.innerHTML=m.map(x=>`<div style="display:flex;justify-content:${x.is_from_me?"flex-start":"flex-end"}"><div class="card" style="margin:4px 0;padding:8px 12px;max-width:80%;${x.is_from_me?"background:var(--ac);color:var(--on)":""}">${!x.message_type||x.message_type==="text"?h(x.content):`<a href="${url(x.content)}" target="_blank" rel="noopener">📎 ملف</a>`}</div></div>`).join("");b.scrollTop=b.scrollHeight}
+async function chatSend(){const i=$("#ci"),t=i.value.trim();if(!t||!CHAT?.cid)return;i.value="";const r=await api("/conversations/"+CHAT.cid,{method:"POST",body:{text:t}});r.ok?chatLoad():toast(r.msg)}
+
+/* --- المنشورات: التعليقات وإنشاء منشور --- */
+postCard=p=>`<article class="card"><div class="who"><span class="av">${url(p.publisher?.profile_photo)?`<img src="${url(p.publisher.profile_photo)}" alt="">`:"👤"}</span>${h(p.publisher?.full_name||"")}${p.publisher?.is_verified?" ✔️":""}</div>
+<div>${h(p.content)}</div>${(p.images||[]).length?`<div class="pimg">${p.images.map(i=>`<img loading="lazy" src="${url(i.url)}" alt="">`).join("")}</div>`:""}
+<div class="meta"><button data-a="like" data-id="${h(p._id)}">👍 ${p.count_likes||0}</button><button data-a="dislike" data-id="${h(p._id)}">👎 ${p.count_dislikes||0}</button><button data-a="cm" data-id="${h(p._id)}">💬 ${p.count_comments||0}</button></div></article>`;
+const _posts=posts;posts=function(){return `<div style="margin-bottom:12px"><button class="btn fill" data-a="np">✏️ منشور جديد</button></div>`+_posts()};
+async function cmts(id){CMID=id||CMID;dlg("💬 التعليقات",'<div id="cc" style="max-height:50vh;overflow:auto" class="empty">جاري التحميل…</div>'+bar("cI","اكتب تعليقاً…","cA"));
+  const r=await api("/posts/comments?post="+CMID),l=r.ok?(r.d.data||[]):[],c=$("#cc");if(!c)return;c.className="";
+  c.innerHTML=l.length?l.map(m=>`<div class="card" style="margin:6px 0;padding:10px 14px"><small>${h(m.user?.full_name)} ${m.user?.is_verified?"✔️":""}</small><div>${h(m.content)}</div><small>👍 ${m.likes_count||0}</small></div>`).join(""):'<div class="empty">لا توجد تعليقات</div>'}
+async function addCm(){const i=$("#cI"),t=i.value.trim();if(!t)return;const r=await api("/posts/comments",{method:"POST",body:{post:CMID,content:t}});r.ok?(loadPosts(),cmts()):toast(r.msg)}
+function newPost(){dlg("نشر منشور جديد",'<textarea id="pc" rows="4" placeholder="اكتب ما تريد مشاركته..."></textarea><label>إضافة صور</label><input id="pi" type="file" accept="image/*" multiple>','<button class="btn fill" data-a="pS">نشر</button>')}
+async function postSend(){const t=$("#pc").value.trim(),fs=[...$("#pi").files];if(!t&&!fs.length)return toast("يرجى إدخال نص أو اختيار صورة");
+  const f=new FormData();f.append("content",t);fs.forEach(x=>f.append("images",x));const r=await api("/posts",{method:"POST",form:f,ms:60000});
+  if(!r.ok)return toast(r.msg);xD.close();toast("تم إرسال المنشور");loadPosts()}
+
+/* --- الطلبات: تفاصيل + حذف --- */
+const _reqs=reqs;reqs=function(){return _reqs().replace(/<div class="card req">/g,'<div class="card req" data-a="rq" style="cursor:pointer">')};
+function reqD(i){const r=(S.reqs[S.rt]||[])[i];if(!r)return;const q=r.Requestion||{},c=r.case_type,yn=v=>v==null?"":v?"نعم":"لا",nm=x=>x?[x.first_name,x.father_name,x.last_name].filter(Boolean).join(" "):"";
+  dlg("تفاصيل الطلب",row("الحالة",RT[S.rt])+row("نوع المعالجة",typeof c==="object"?c?.case_type:c)+row("رقم السن",q.tooth_location+(toothName(q.tooth_location)?" — "+toothName(q.tooth_location):""))+row("شدة الألم",q.pain_severity!=null?q.pain_severity+" / 5":"")+row("وقت الألم",q.pain_time)+row("العمر",q.age)+row("الجنس",q.gender==="male"?"ذكر":q.gender==="female"?"أنثى":"")+row("حامل",yn(q.is_pregnant))+row("أمراض مزمنة",q.chronic_diseases)+row("أدوية",q.medicines)+row("عولج سابقاً",yn(q.previous_treatment))+row("ملاحظات",q.notes)+row("الطالب",nm(r.student))+row("المشرف",nm(r.overseer))+row("تاريخ القبول",r.date_of_accepting&&new Date(r.date_of_accepting).toLocaleDateString("ar"))+row("التقييم",r.rating)+row("التعليق",r.feedback)
+  +(r.stage_evaluations||[]).map(s=>row("مرحلة "+(s.date?new Date(s.date).toLocaleDateString("ar"):""),s.text)).join("")+(url(q.photo?.url)?`<img src="${url(q.photo.url)}" alt="" style="width:100%;border-radius:12px;margin-top:10px">`:""),
+  S.rt===0?`<button class="btn" style="color:var(--rej);border-color:var(--rej)" data-a="rd" data-id="${h(r._id)}">حذف الطلب</button>`:"")}
+async function delReq(id){if(!confirm("هل تريد حذف هذا الطلب؟"))return;const r=await api("/request/"+id,{method:"DELETE"});if(!r.ok)return toast(r.msg);xD.close();toast("تم حذف الطلب");S.reqs[0]=null;render();loadReqs(0);loadHome()}
+
+/* --- الملف الشخصي: عرض، تعديل، صورة، كلمة المرور، الخصوصية، مراسلة المشرفين --- */
+async function loadProf(){const r=await api("/profile");if(r.ok&&r.d.data){S.user={...S.user,...r.d.data};LS.s("user",JSON.stringify(S.user));if(S.tab===3)render()}}
+const _go=go;go=function(i){_go(i);if(i===3&&S.token)loadProf()};
+prof=function(){const u=S.user||{},n=[u.first_name,u.father_name,u.last_name].filter(Boolean).join(" ");
+  return `<section class="card"><div class="who" style="font-size:1.05rem;color:var(--tx)"><span class="av" style="width:64px;height:64px;font-size:1.8rem;cursor:pointer" data-a="photo">${url(u.profile_photo?.url)?`<img src="${url(u.profile_photo.url)}" alt="">`:"👤"}</span><div><b>${h(n)}</b> ${u.is_verified?"✔️":""}<br><small>${h(u.email||"")}</small></div></div><input id="pf" type="file" accept="image/*" hidden>
+  ${row("رقم الهاتف",u.phone_number)}${row("نبذة",u.bio)}${row("العمر",u.age)}${row("الجنس",u.gender==="male"?"ذكر":u.gender==="female"?"أنثى":"")}${row("حالات مكتملة",u.count_cases_finishds)}${row("حالات قيد المعالجة",u.count_cases_in_process)}</section>
+  <section class="card list"><button data-a="ep">✏️ تعديل الملف الشخصي</button><button data-a="cp">🔒 تغيير كلمة المرور</button><button data-a="ct">📨 مراسلة المشرفين</button><button data-a="pv">🛡️ سياسة الخصوصية</button><button data-a="th">🎨 تبديل الثيم</button><button data-a="out">🚪 تسجيل الخروج</button></section>`};
+const inp=(id,l,v="",t="text")=>`<label>${l}</label><input id="${id}" type="${t}" value="${h(v)}">`;
+function editP(){const u=S.user||{};dlg("تعديل الملف الشخصي",inp("e1","الاسم الأول",u.first_name)+inp("e2","اسم الأب",u.father_name)+inp("e3","الكنية",u.last_name)+inp("e4","رقم الهاتف",u.phone_number)+`<label>نبذة عني</label><textarea id="e5" rows="3">${h(u.bio)}</textarea>`+inp("e6","العمر",u.age,"number")+`<label>الجنس</label><select id="e7"><option value="male"${u.gender==="male"?" selected":""}>ذكر</option><option value="female"${u.gender==="female"?" selected":""}>أنثى</option></select>`,'<button class="btn fill" data-a="eS">حفظ</button>')}
+async function saveP(){const v=i=>$("#"+i).value.trim(),d={first_name:v("e1"),father_name:v("e2"),last_name:v("e3"),phone_number:v("e4"),bio:v("e5"),age:v("e6"),gender:v("e7")};
+  if(!d.first_name||!d.father_name||!d.last_name)return toast("هذا الحقل مطلوب");const r=await api("/profile",{method:"PUT",body:d});if(!r.ok)return toast(r.msg);
+  S.user={...S.user,...(r.d.data||d)};LS.s("user",JSON.stringify(S.user));xD.close();render();toast("تم تحديث الملف الشخصي")}
+document.addEventListener("change",async e=>{if(e.target.id!=="pf"||!e.target.files[0])return;const f=new FormData();f.append("profile_photo",e.target.files[0]);
+  const r=await api("/users/photo",{method:"PUT",form:f,ms:60000});if(!r.ok)return toast(r.msg);const p=r.d.data?.profile_photo;if(p){S.user.profile_photo=p;LS.s("user",JSON.stringify(S.user))}render();toast("تم تحديث الصورة")});
+function chPw(){dlg("تغيير كلمة المرور",inp("o1","كلمة المرور الحالية","","password")+inp("o2","كلمة المرور الجديدة","","password")+inp("o3","تأكيد كلمة المرور الجديدة","","password"),'<button class="btn fill" data-a="cS">تغيير كلمة المرور</button>')}
+async function pwSend(){const v=i=>$("#"+i).value;if(!v("o1")||!v("o2"))return toast("الرجاء ملء جميع الحقول");if(v("o2")!==v("o3"))return toast("كلمتا المرور غير متطابقتين");
+  const r=await api("/auth/change-password",{method:"POST",body:{old_password:v("o1"),new_password:v("o2")},auth:false});if(!r.ok)return toast(r.msg);xD.close();endSession("تم تغيير كلمة المرور، سجّل الدخول من جديد")}
+const PV=[["جمع المعلومات","نحن نجمع المعلومات التي تقدمها عند إنشاء حساب، مثل الاسم، البريد الإلكتروني، الدور (طالب/مريض)، وغيرها. كما قد نجمع بعض البيانات المتعلقة بالاستخدام لتحسين الخدمة."],["استخدام المعلومات","تُستخدم معلوماتك لتوفير الخدمات المطلوبة (الاستشارات، الطلبات، المحادثات) وتحسين تجربتك. لن يتم مشاركة معلوماتك مع أطراف ثالثة دون موافقتك إلا إذا اقتضى القانون ذلك."],["حماية البيانات","نحن نتخذ إجراءات أمنية لحماية بياناتك من الوصول غير المصرح به. ومع ذلك، لا يمكن ضمان أمان البيانات المنقولة عبر الإنترنت بنسبة 100%."],["ملفات تعريف الارتباط","نستخدم ملفات تعريف الارتباط لتحسين أداء التطبيق وتحليل الاستخدام. يمكنك تعطيلها من إعدادات متصفحك ولكن قد يؤثر ذلك على بعض الوظائف."],["حقوقك","لديك الحق في الوصول إلى بياناتك وتصحيحها أو حذفها، ويمكنك التواصل معنا لطلب ذلك."],["التغييرات على السياسة","قد نقوم بتحديث هذه السياسة بين الحين والآخر. سيتم إشعارك بأي تغييرات جوهرية عبر التطبيق."]];
+const privacy=()=>dlg("سياسة الخصوصية",PV.map(p=>`<h3 style="margin:12px 0 4px;font-size:1rem">${p[0]}</h3><div class="mut">${p[1]}</div>`).join(""));
+async function contact(){dlg("مراسلة المشرفين",'<div id="ad" class="empty">جاري التحميل…</div><h3 style="font-size:1rem;margin:16px 0 0">رسالة دعم</h3>'+inp("s1","الموضوع")+`<label>الرسالة</label><textarea id="s2" rows="3"></textarea>`,'<button class="btn fill" data-a="sS">إرسال</button>');
+  const r=await api("/reports/admins"),l=r.ok?(r.d.data||[]):[],a=$("#ad");if(!a)return;a.className="";
+  a.innerHTML=l.length?l.map(x=>{const n=x.full_name||[x.first_name,x.last_name].filter(Boolean).join(" ")||"مشرف";return `<button class="card" style="width:100%;text-align:start;margin:6px 0;color:inherit;font:inherit;cursor:pointer" data-a="chat" data-id="${h(x.userId||x._id||x.id)}" data-n="${h(n)}">👤 ${h(n)}</button>`}).join(""):'<div class="empty">لا يوجد مشرفون متاحون حالياً</div>'}
+async function support(){const s=$("#s1").value.trim(),m=$("#s2").value.trim();if(!s||!m)return toast("الرجاء ملء جميع الحقول");const r=await api("/support",{method:"POST",body:{subject:s,message:m}});r.ok?(xD.close(),toast("تم إرسال الرسالة")):toast(r.msg)}
+
+/* --- موزّع الأحداث --- */
+document.addEventListener("click",e=>{const t=e.target.closest("[data-a]");if(!t)return;const a=t.dataset.a,I=t.dataset.id;
+  if(e.target.closest("button[data-a]")&&a==="rq")return;
+  const m={ai:aiOpen,aiS:aiSend,aiC:async()=>{await api("/ai/history",{method:"DELETE"});aiOpen()},convs,notifs,chat:()=>chat(I,t.dataset.n),cs:chatSend,cm:()=>cmts(I),cA:addCm,np:newPost,pS:postSend,
+   rq:()=>reqD([...t.parentNode.querySelectorAll("[data-a=rq]")].indexOf(t)),rd:()=>delReq(I),ep:editP,eS:saveP,cp:chPw,cS:pwSend,pv:privacy,ct:contact,sS:support,photo:()=>$("#pf").click()};
+  if(m[a])m[a]()});
+document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const m={aiI:aiSend,ci:chatSend,cI:addCm}[e.target.id];if(m)m()});
+render();
+</script>
+
+<script>
+/* ===== الجزء الثالث: منشوراتي والمعلّقة، تعديل الطلب، ملف مستخدم آخر والإبلاغ، ملفات المحادثة، الـ onboarding ===== */
+S.pt=0;S.mine=null;S.pend=null;let PE=null;
+const PT=["الكل","منشوراتي","طلاب","مرضى","مشرفين","بانتظار الموافقة"],RR=["مضايقة","محتوى غير لائق","انتحال شخصية","إعلانات مزعجة","سبب آخر"];
+const _pc0=postCard;postCard=p=>{const id=p.publisher?._id||p.publisher?.id||p.publisher?.userId,s=_pc0(p);return id?s.replace('<div class="who">',`<div class="who" data-a="up" data-id="${h(id)}" style="cursor:pointer">`):s};
+const _pc=postCard;
+async function loadMine(k){const r=await api(k?"/posts/pending":"/posts/my");S[k?"pend":"mine"]=r.ok?(r.d.data||[]):{err:r.msg};if(S.tab===2&&S.pt===k+1)render()}
+const own=p=>`<div class="acts" style="justify-content:flex-start;margin-top:8px"><button class="btn" data-a="pe" data-id="${h(p._id)}">تعديل</button><button class="btn" style="color:var(--rej);border-color:var(--rej)" data-a="pd" data-id="${h(p._id)}">حذف</button></div>`;
+posts=function(){const l=[S.posts,S.mine,S.pend][S.pt],em='<div class="card empty">لا توجد منشورات</div>',
+ head=`<div style="margin-bottom:12px"><button class="btn fill" data-a="np">✏️ منشور جديد</button></div><div class="tabs">${PT.map((t,i)=>`<button class="${i===S.pt?"on":""}" data-a="pt" data-i="${i}">${t}</button>`).join("")}</div>`;
+ if(S.pt===0)return head+`<div class="posts">${S.posts.map(postCard).join("")||em}</div>${S.page<S.pages?`<div style="text-align:center;margin:10px"><button class="btn" data-a="more">عرض المزيد</button></div>`:""}`;
+ if(!l)return head+'<div class="card empty">جاري التحميل…</div>';if(l.err)return head+`<div class="card empty">${h(l.err)}</div>`;
+ return head+`<div class="posts">${l.map(p=>_pc(p).replace(/<\/article>$/,(S.pt===2?'<small style="color:var(--wait)">⏳ بانتظار الموافقة</small>':"")+own(p)+"</article>")).join("")||em}</div>`};
+function pEdit(id){const p=[...(S.mine||[]),...(S.pend||[])].find(x=>x._id===id);if(!p)return;PE=p;
+ dlg("تعديل المنشور",`<textarea id="pc" rows="4">${h(p.content)}</textarea>${(p.images||[]).length?"<label>تحديد صور لحذفها</label>"+p.images.map(i=>`<label style="display:flex;gap:8px;align-items:center;color:var(--tx)"><input type="checkbox" class="di" value="${h(i._id||i.id||i.public_id)}" style="width:auto"><img src="${url(i.url)}" alt="" style="height:50px;border-radius:8px"></label>`).join(""):""}<label>إضافة صور جديدة</label><input id="pi" type="file" accept="image/*" multiple>`,'<button class="btn fill" data-a="pu">حفظ</button>')}
+async function pUpd(){const del=[...document.querySelectorAll(".di:checked")].map(x=>x.value),f=new FormData();f.append("content",$("#pc").value.trim());f.append("deleteImages","["+del.join(", ")+"]");[...$("#pi").files].forEach(x=>f.append("images",x));
+ const r=await api("/posts/"+PE._id,{method:"PUT",form:f,ms:60000});if(!r.ok)return toast(r.msg);xD.close();toast("تم تحديث المنشور");S.mine=S.pend=null;loadMine(S.pt===5?1:0);loadPosts()}
+async function pDel(id){if(!confirm("هل تريد حذف هذا المنشور؟"))return;const r=await api("/posts/"+id,{method:"DELETE"});if(!r.ok)return toast(r.msg);toast("تم حذف المنشور");S.mine=S.pend=null;loadMine(S.pt===5?1:0);loadPosts()}
+
+/* --- تعديل الطلب (PUT /request/:id) --- */
+const _rd=reqD;reqD=function(i){_rd(i);const r=(S.reqs[S.rt]||[])[i];if(S.rt===0&&r)xD.querySelector(".acts").insertAdjacentHTML("afterbegin",`<button class="btn" data-a="er" data-id="${h(r._id)}">تعديل الطلب</button>`)};
+async function editReq(id){const r=(S.reqs[0]||[]).find(x=>x._id===id);if(!r)return;await openReq();
+ const q=r.Requestion||{},set=(i,v)=>{const e=$("#"+i);if(e&&v!=null)e.value=v},ev=(i,t)=>$("#"+i).dispatchEvent(new Event(t,{bubbles:true})),b01=v=>v==null?"":v?1:0;
+ $("#reqD h2").textContent="تعديل الطلب";set("ct",r.case_type?._id||"");set("age",q.age);set("ge2",q.gender);ev("ge2","change");set("pg",b01(q.is_pregnant));
+ set("sev",q.pain_severity||0);ev("sev","input");set("pt",q.pain_time);set("tl",q.tooth_location);ev("tl","input");set("prev",b01(q.previous_treatment));
+ if(q.chronic_diseases){set("chr",1);ev("chr","change");set("chn",q.chronic_diseases)}if(q.medicines){set("med",1);ev("med","change");set("men",q.medicines)}set("nt",q.notes);
+ const b=$("#snd");b.dataset.a="us";b.dataset.id=id;b.textContent="حفظ التعديلات"}
+async function updReq(id){const p=payload(true);if(!p)return;const b=$("#snd"),file=$("#ph").files[0];b.disabled=true;
+ const r=file?await api("/request/"+id,{method:"PUT",form:toForm(p,"photo",file),ms:60000}):await api("/request/"+id,{method:"PUT",body:p});b.disabled=false;
+ if(!r.ok)return toast(r.msg);$("#reqD").close();toast("تم تعديل الطلب بنجاح");S.reqs={};render();loadReqs(0)}
+
+/* --- ملف مستخدم آخر + الإبلاغ + ملفات المحادثة --- */
+async function userP(id){if(needLogin())return;dlg("الملف الشخصي",'<div class="empty">جاري التحميل…</div>');const r=await api("/users/"+id);
+ if(!r.ok){xD.querySelector(".empty").textContent=r.msg;return}const u=r.d.data||{},n=[u.first_name,u.father_name,u.last_name].filter(Boolean).join(" ")||u.full_name||"";
+ dlg("الملف الشخصي",`<div class="who" style="font-size:1.05rem;color:var(--tx)"><span class="av" style="width:64px;height:64px;font-size:1.8rem">${url(u.profile_photo?.url)?`<img src="${url(u.profile_photo.url)}" alt="">`:"👤"}</span><div><b>${h(n)}</b> ${u.is_verified?"✔️":""}</div></div>${row("نبذة",u.bio)}${row("الرقم الجامعي",u.university_number)}${row("حالات مكتملة",u.count_cases_finishds)}${row("حالات قيد المعالجة",u.count_cases_in_process)}`,
+ `<button class="btn" data-a="chat" data-id="${h(id)}" data-n="${h(n)}">💬 مراسلة</button><button class="btn" style="color:var(--rej);border-color:var(--rej)" data-a="rp" data-id="${h(id)}">🚩 إبلاغ</button>`)}
+const report=id=>dlg("إبلاغ عن مستخدم",`<label>سبب الإبلاغ</label><select id="rr">${RR.map(x=>`<option>${x}</option>`).join("")}</select><label>وصف (اختياري)</label><textarea id="rd2" rows="3"></textarea>`,`<button class="btn fill" data-a="rs" data-id="${h(id)}">إرسال</button>`);
+async function repSend(id){const t=$("#rr").value,d=$("#rd2").value.trim();if(t==="سبب آخر"&&!d)return toast("الرجاء كتابة وصف للسبب");const r=await api("/reports/"+id,{method:"POST",body:{type:t,reason:d||t}});r.ok?(xD.close(),toast("تم إرسال البلاغ")):toast(r.msg)}
+const _chat=chat;chat=async function(id,n){await _chat(id,n);xD.querySelector(".acts").insertAdjacentHTML("afterbegin",`<button class="btn" data-a="up" data-id="${h(id)}">👤 الملف</button><button class="btn" data-a="cf">📎 ملف</button><input id="cfi" type="file" hidden>`)};
+document.addEventListener("change",async e=>{if(e.target.id!=="cfi"||!e.target.files[0]||!CHAT?.cid)return;const f=new FormData();f.append("file",e.target.files[0]);
+ const r=await api("/conversations/"+CHAT.cid,{method:"POST",form:f,ms:60000});r.ok?chatLoad():toast(r.msg)});
+
+/* --- Onboarding: نفس شرائح التطبيق الأربع --- */
+const OB=[["أسنانك في أمان تام","بيئة رقمية آمنة تحافظ على خصوصية بياناتك وتوفر لك رعاية متكاملة لأسنانك مع أعلى معايير الأمان"],["معالجات مجانية بمستوى أكاديمي","استشر أفضل أطباء الأسنان في بيئة جامعية متطورة، حيث تتوفر لك المعالجات مجاناً وبجودة أكاديمية عالية"],["سهولة في التواصل ومرونة في التعامل","تواصل مباشر مع المشرفين والطلاب، وادارة طلباتك بسلاسة، وبيئة تفاعلية تتيح لك المتابعة في أي وقت"],["تصميم أنيق وكفاءة عالية","تجربة مستخدم متميزة بلمسات جمالية عصرية، مع ضمان أعلى درجات الكفاءة والدقة الأكاديمية في كل خطوة"]];
+let obI=0;const obEl=document.createElement("div");obEl.style.cssText="position:fixed;inset:0;z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:linear-gradient(160deg,var(--ac),var(--lt) 60%,var(--bg));color:var(--tx);overflow:auto";document.body.appendChild(obEl);
+function obDraw(){const o=OB[obI],last=obI===OB.length-1;obEl.innerHTML=`<img src="images/onboarding/onboarding${obI+1}.png" alt="" style="max-width:min(300px,70vw);max-height:36vh" onerror="this.style.display='none'"><h2 style="margin:0">${o[0]}</h2><p class="mut" style="max-width:420px;margin:0;color:var(--tx)">${o[1]}</p><div>${OB.map((_,i)=>`<span style="display:inline-block;width:${i===obI?22:8}px;height:8px;border-radius:4px;margin:0 3px;background:${i===obI?"var(--pr)":"var(--bd)"}"></span>`).join("")}</div><div class="acts" style="margin:0">${last?"":'<button class="btn" data-a="obS">تخطي</button>'}<button class="btn fill" data-a="obN">${last?"ابدأ الآن":"التالي"}</button></div>`}
+function obEnd(){LS.s("onb","1");obEl.style.display="none";if(!S.token){S.view="auth";S.mode="login";render()}}
+if(!LS.g("onb")){obEl.style.display="flex";obDraw()}
+
+document.addEventListener("click",e=>{const t=e.target.closest("[data-a]");if(!t)return;const a=t.dataset.a,I=t.dataset.id,m={
+ pt:()=>ptGo(+t.dataset.i),pe:()=>pEdit(I),pd:()=>pDel(I),pu:pUpd,er:()=>{xD.close();editReq(I)},us:()=>updReq(I),
+ up:()=>userP(I),rp:()=>report(I),rs:()=>repSend(I),cf:()=>$("#cfi").click(),obN:()=>{obI<OB.length-1?(obI++,obDraw()):obEnd()},obS:obEnd};
+ if(m[a])m[a]()});
+render();
+</script>
+
+<style>
+/* ===== الجزء الرابع: تصميم مطابق للتطبيق (ترويسة متدرجة، أيقونات كبسولة، حواف ورقية، توهج حسب الجنس) ===== */
+:root{--leaf:100px 10px 100px 10px/10px 100px 10px 100px}
+header{background:linear-gradient(180deg,var(--lt),var(--pr));color:#fff;border-radius:0 0 28px 28px;box-shadow:0 4px 14px #0004;text-shadow:0 1px 3px #0006}
+.ib,.dl{color:#fff}
+.stats,.rq,.auth,dialog{border-radius:var(--leaf)}
+dialog{border:2px solid var(--ac)}
+.card{border-width:1.5px}
+nav button{font-size:.68rem;font-weight:700;color:var(--pr)}[data-theme="dark"] nav button{color:#000}
+nav button span{width:46px;height:34px;display:grid;place-items:center;border-radius:18px;background:#ffffffb3;color:var(--pr);transition:.25s;font-size:1.25rem}
+nav button.on{color:var(--pr)}nav button.on span{background:var(--ac);color:#fff;box-shadow:0 0 10px var(--ac)}
+@media(min-width:900px){nav button span{width:38px;height:30px}nav button{font-weight:500}}
+.btn{box-shadow:0 0 8px var(--ac)}
+.rq{--g:var(--bd);border:.5px solid var(--g)!important;box-shadow:0 0 18px var(--g);cursor:pointer;text-align:center;padding:14px 18px;display:block}
+.rqt{font-size:.9rem;margin-bottom:4px}
+.rqr{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;justify-content:center;font-size:.8rem;margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)}
+.chip{background:var(--bg);border-radius:10px 4px 10px 4px;padding:3px 10px;box-shadow:0 1px 4px #0003;color:var(--tx)}
+.pain i{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid var(--pr);margin:0 1px}.pain i.on{background:#ff8a80}.pain i.on.hi{background:var(--rej)}
+.teeth{display:flex;gap:6px;justify-content:center;margin:6px 0}.teeth span{font-size:1.7rem;filter:grayscale(1);opacity:.35;cursor:pointer;transition:.15s}.teeth span.on{filter:none;opacity:1;transform:scale(1.12)}
+.empty::before{content:"🦷";display:grid;place-items:center;width:72px;height:72px;margin:0 auto 10px;border-radius:50%;background:var(--lt);font-size:2rem}
+#aiL .card{white-space:pre-wrap}
+#splash{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(180deg,#fff,var(--lt) 55%,var(--pr));color:#fff;transition:opacity .5s;text-shadow:0 1px 4px #0005}
+#splash.hide{opacity:0;pointer-events:none}#splash h1{margin:0;font-size:2.2rem}
+</style>
+<script>
+/* --- أسماء الأسنان (نفس ToothConstants) + شدة الألم 0-5 بأسنان --- */
+const TP={1:["ثنية",1],2:["رباعية",1],3:["ناب",0],4:["ضاحك أول",0],5:["ضاحك ثاني",0],6:["رحى أولى",1],7:["رحى ثانية",1],8:["رحى ثالثة",1]};
+const TPC={1:["ثنية",1],2:["رباعية",1],3:["ناب",0],4:["رحى أولى",1],5:["رحى ثانية",1]};
+const toothName=n=>{n=String(n||"").trim();const q=+n[0],p=+n[1];if(n.length!==2)return"";
+ if(q>=1&&q<=4&&TP[p]){const f=TP[p][1];return TP[p][0]+" "+((q<3)?(f?"علوية":"علوي"):(f?"سفلية":"سفلي"))+" "+((q===1||q===4)?"يمين":"يسار")}
+ if(q>=5&&q<=8&&TPC[p]){const f=TPC[p][1];return TPC[p][0]+" "+((q<7)?(f?"علوية":"علوي"):(f?"سفلية":"سفلي"))+" "+((q===5||q===8)?"يمين":"يسار")+" (لبنية)"}
+ return""};
+const pain5=v=>`<span class="pain">${[1,2,3,4,5].map(i=>`<i class="${i<=v?"on"+(i>2?" hi":""):""}"></i>`).join("")}</span>`;
+const chip=t=>`<span class="chip">${h(t)}</span>`;
+const _open=openReq;openReq=async function(){await _open();const r=$("#sev");r.max=5;r.style.display="none";r.previousElementSibling.innerHTML='شدة الألم <b id="sv" hidden>0</b>';
+ r.insertAdjacentHTML("afterend",'<div class="teeth" id="th5">'+[1,2,3,4,5].map(i=>`<span data-v="${i}">🦷</span>`).join("")+"</div>");
+ const draw=()=>document.querySelectorAll("#th5 span").forEach(s=>s.classList.toggle("on",+s.dataset.v<=+r.value));r.addEventListener("input",draw);
+ $("#th5").onclick=e=>{const s=e.target.closest("span");if(!s)return;const v=+s.dataset.v;r.value=+r.value===v?v-1:v;r.dispatchEvent(new Event("input",{bubbles:true}))};
+ const tl=$("#tl");tl.insertAdjacentHTML("afterend",'<div class="mut" id="tn" style="font-size:.85rem;margin-top:4px"></div>');
+ tl.previousElementSibling.insertAdjacentHTML("beforeend",' <button type="button" class="btn" data-a="th7" style="padding:1px 12px;font-size:.78rem;box-shadow:none">🦷 تلميح!</button>');
+ tl.addEventListener("input",()=>{$("#tn").textContent=toothName(tl.value)});draw()};
+function toothHint(){const l=[];for(let q=1;q<=4;q++)for(let p=1;p<=8;p++)l.push(`<small>${q}${p}: ${toothName(""+q+p)}</small>`);
+ dlg("اكتب رقم السن بناءً على المخطط التالي",`<img src="images/images_asnan/tooth_number.png" alt="" style="width:100%" onerror="this.remove()"><div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;margin-top:8px">${l.join("")}</div>`)}
+
+/* --- التسجيل: نفس RegisterValidator (عربي فقط، بريد صحيح، 6 أحرف، تأكيد كلمة المرور) --- */
+const _auth=auth;auth=function(){const s=_auth();return S.mode==="login"?s:s.replace(/(<label>كلمة المرور<\/label><input id="pw"[^>]*>)/,'$1<label>تأكيد كلمة المرور</label><input id="fc" type="password" autocomplete="off">')};
+const RXN=/^[\u0621-\u064A\s]+$/,RXE=/^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$/;
+const _sa=submitAuth;submitAuth=function(){const v=i=>$("#"+i)?.value.trim()||"",E=m=>{toast(m);return 0};
+ if(!v("em"))return E("البريد الإلكتروني مطلوب");if(!RXE.test(v("em")))return E("البريد الإلكتروني غير صحيح");if(!v("pw"))return E("كلمة المرور مطلوبة");
+ if(S.mode==="register"){for(const[i,n]of[["fn","الاسم"],["fa","اسم الأب"],["ln","الكنية"]]){if(!v(i))return E("حقل "+n+" مطلوب");if(!RXN.test(v(i)))return E("يجب أن يحتوي "+n+" على أحرف عربية فقط")}
+  if(v("pw").length<6)return E("كلمة المرور يجب أن تكون 6 أحرف على الأقل");if(!v("fc"))return E("تأكيد كلمة المرور مطلوب");if(v("fc")!==v("pw"))return E("كلمة المرور غير متطابقة")}
+ return _sa()};
+
+/* --- بطاقة الطلب بتصميم التطبيق --- */
+reqs=function(){const l=S.reqs[S.rt];
+ return `<div class="top" style="margin:0 4px 10px"><span>طلباتي</span><button class="btn" style="padding:4px 14px" data-a="rr">تحديث</button></div><div class="tabs">${RT.map((t,i)=>`<button class="${i===S.rt?"on":""}" data-a="rt" data-i="${i}">${t}</button>`).join("")}</div>`+
+ (!l?'<div class="card empty">جاري التحميل…</div>':l.err?`<div class="card empty">${h(l.err)}</div>`:!l.length?'<div class="card empty">لا يوجد بيانات هنا</div>':
+ l.map(r=>{const q=r.Requestion||{},ct=typeof r.case_type==="object"?r.case_type?.case_type:r.case_type,g=q.gender==="female"?"#e91e63":q.gender==="male"?"var(--pr)":"var(--bd)",co=r.course_info?.course_name,st=r.student?.first_name;
+ return `<div class="card rq" data-a="rq" style="--g:${g}"><div class="rqt">${h(toothName(q.tooth_location)||"غير محدد")} 🦷</div>
+ <div class="rqr">${co?`<span>المادة</span>${chip(co)}`:""}<span>الحالة</span>${chip(ct||"")}</div>
+ <div class="rqr"><span>شدة الألم:</span><span class="chip">${pain5(q.pain_severity||0)}</span><span>وقت الألم:</span>${chip(q.pain_time||"غير محدد")}</div>${st?`<div class="rqr"><small>الطالب: ${h(st)}</small></div>`:""}</div>`}).join(""))};
+
+/* --- المنشورات: فلاتر التطبيق (الكل، منشوراتي، طلاب، مرضى، مشرفين) + المعلّقة --- */
+S.flt=null;
+loadPosts=async function(more){if(!S.token)return;const p=more?S.page+1:1,f=S.flt?"&filter="+S.flt:"";const r=await api(`/posts?page=${p}&limit=10&sort=createdAt&order=desc${f}`);
+ if(!r.ok)return toast(r.msg);S.page=p;S.pages=r.d.pagination?.total_pages||1;S.posts=more?(S.posts||[]).concat(r.d.data||[]):(r.d.data||[]);if(S.tab===2&&[0,2,3,4].includes(S.pt))render()};
+loadMine=async function(k){const r=await api(k?"/posts/pending":"/posts/my");S[k?"pend":"mine"]=r.ok?(r.d.data||[]):{err:r.msg};if(S.tab===2&&S.pt===(k?5:1))render()};
+function ptGo(i){S.pt=i;S.flt=[null,null,"student","patient","overseer"][i]||null;if([0,2,3,4].includes(i)){S.posts=null;render();loadPosts()}else{render();if(!S[i===1?"mine":"pend"])loadMine(i===1?0:1)}}
+posts=function(){const l=[0,2,3,4].includes(S.pt)?S.posts:S.pt===1?S.mine:S.pend,em=`<div class="card empty">${S.pt===1?"لسا ما نشرت أي منشور حتى الآن":"لا توجد بوستات بعد، كن أول من ينشر!"}</div>`,
+ head=`<div style="margin-bottom:12px"><button class="btn fill" data-a="np">✏️ منشور جديد</button></div><div class="tabs">${PT.map((t,i)=>`<button class="${i===S.pt?"on":""}" data-a="pt" data-i="${i}">${t}</button>`).join("")}</div>`;
+ if(!l)return head+'<div class="card empty">جاري التحميل…</div>';if(l.err)return head+`<div class="card empty">${h(l.err)}</div>`;
+ const mine=S.pt===1||S.pt===5;
+ return head+`<div class="posts">${l.map(p=>mine?_pc(p).replace(/<\/article>$/,(S.pt===5?'<small style="color:var(--wait)">⏳ بانتظار الموافقة</small>':"")+own(p)+"</article>"):postCard(p)).join("")||em}</div>`+(S.pt!==1&&S.pt!==5&&S.page<S.pages?'<div style="text-align:center;margin:10px"><button class="btn" data-a="more">عرض المزيد</button></div>':"")};
+
+/* --- تفاصيل المنشور + إعجاب بالتعليقات --- */
+cmts=async function(id){CMID=id||CMID;dlg("تفاصيل المنشور",'<div id="pd" class="empty">جاري التحميل…</div><h3 style="font-size:1rem;margin:12px 0 4px">التعليقات</h3><div id="cc" style="max-height:40vh;overflow:auto" class="empty">جاري التحميل…</div>'+bar("cI","اكتب تعليقاً...","cA"));
+ const[a,b]=await Promise.all([api("/posts/"+CMID),api("/posts/comments?post="+CMID)]),pd=$("#pd"),c=$("#cc");if(!pd||!c)return;pd.className="";c.className="";
+ pd.innerHTML=a.ok&&a.d.data?postCard(a.d.data):"البوست غير موجود";const l=b.ok?(b.d.data||[]):[];
+ c.innerHTML=l.length?l.map(m=>`<div class="card" style="margin:6px 0;padding:10px 14px"><small>${h(m.user?.full_name)} ${m.user?.is_verified?"✔️":""}</small><div>${h(m.content)}</div><button class="ib" style="background:none;color:var(--t2);padding:2px 0;width:auto;height:auto" data-a="cl" data-id="${h(m._id)}">👍 ${m.likes_count||0}</button></div>`).join(""):'<div class="empty">لا توجد تعليقات بعد، كن أول من يعلق</div>'};
+
+/* --- الإشعارات: تحديد الكل كمقروء، حذف الكل، الوقت النسبي --- */
+const ago=t=>{const m=Math.floor((Date.now()-t)/6e4);return m<1?"الآن":m<60?`منذ ${m} دقيقة`:m<1440?`منذ ${Math.floor(m/60)} ساعة`:`منذ ${Math.floor(m/1440)} يوم`};
+const nSave=()=>{LS.s("notifs",JSON.stringify(N));bd()};
+function nDraw(){dlg("🔔 الإشعارات",N.length?N.map(x=>`<div class="card" style="margin:6px 0;padding:10px 14px"><b style="font-weight:${x.r?400:700}">${h(x.title)}</b><br><small>${h(x.body)}</small><br><small>${ago(x.t)}</small></div>`).join(""):'<div class="empty">لا توجد إشعارات<br><small>سيتم عرض الإشعارات الجديدة هنا</small></div>',N.length?'<button class="btn" data-a="nr">تحديد الكل كمقروء</button><button class="btn" style="color:var(--rej);border-color:var(--rej)" data-a="nd">حذف الكل</button>':"")}
+notifs=function(){if(needLogin())return;nDraw()};
+
+/* --- الملف الشخصي: بطاقة المطوّر --- */
+const _pf=prof;prof=function(){return _pf()+'<section class="card" style="text-align:center"><small>مطوّر التطبيق</small><br><b>محمد صادق عوض</b><br><small>مطوّر Flutter · خبرة عدة سنوات</small><br><small>© 2026 — جميع الحقوق محفوظة</small></section>'};
+
+document.addEventListener("click",e=>{const t=e.target.closest("[data-a]");if(!t)return;const a=t.dataset.a,I=t.dataset.id;
+ if(a==="th7")toothHint();
+ else if(a==="nr"){N.forEach(x=>x.r=1);nSave();nDraw()}
+ else if(a==="nd"){if(confirm("هل أنت متأكد من حذف جميع الإشعارات؟")){N=[];nSave();nDraw()}}
+ else if(a==="cl")api("/posts/comments/comments/"+I+"/like",{method:"POST",body:{}}).then(r=>r.ok?cmts():toast(r.msg))});
+
+/* --- شاشة البداية --- */
+const sp=document.createElement("div");sp.id="splash";sp.innerHTML='<div style="font-size:4.5rem">🦷</div><h1>أسناني</h1><div>جاري التحميل...</div>';document.body.appendChild(sp);
+setTimeout(()=>{sp.classList.add("hide");setTimeout(()=>sp.remove(),600)},900);
+render();
+</script>
+
+<style>
+/* ===== الجزء الخامس: اختيار السن من المخطط (نسب مئوية، يعمل على أي حجم شاشة) ===== */
+.tchart{position:relative;width:min(100%,360px);margin:10px auto;border-radius:16px;overflow:hidden;cursor:pointer;touch-action:manipulation;user-select:none;box-shadow:0 0 14px var(--ac)}
+.tchart img{display:block;width:100%;height:auto;pointer-events:none}
+.tmark{position:absolute;width:11%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:3px solid #fff;box-shadow:0 0 14px 5px var(--ac),inset 0 0 10px var(--ac);pointer-events:none;animation:tp 1.4s infinite}
+@keyframes tp{50%{box-shadow:0 0 22px 9px var(--ac),inset 0 0 10px var(--ac)}}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;padding:8px;background:var(--card)}
+</style>
+<script>
+/* مراكز الأسنان كنسب (x/العرض، y/الارتفاع) من الصورتين الأصليتين؛ تبقى صحيحة مهما كان حجم الشاشة */
+const TA={"11":[0.454,0.123],"12":[0.368,0.136],"13":[0.318,0.176],"14":[0.274,0.220],"15":[0.233,0.273],"16":[0.206,0.326],"17":[0.189,0.392],"18":[0.189,0.447],"21":[0.545,0.123],"22":[0.627,0.142],"23":[0.682,0.176],"24":[0.719,0.218],"25":[0.764,0.277],"26":[0.792,0.331],"27":[0.808,0.396],"28":[0.811,0.457],"31":[0.537,0.878],"32":[0.590,0.870],"33":[0.643,0.847],"34":[0.690,0.807],"35":[0.743,0.752],"36":[0.796,0.684],"37":[0.814,0.623],"38":[0.808,0.563],"41":[0.458,0.878],"42":[0.407,0.870],"43":[0.354,0.850],"44":[0.309,0.811],"45":[0.262,0.752],"46":[0.212,0.690],"47":[0.200,0.625],"48":[0.200,0.558]},TC={"51":[0.444,0.146],"52":[0.352,0.168],"53":[0.291,0.212],"54":[0.244,0.267],"55":[0.210,0.332],"61":[0.552,0.146],"62":[0.646,0.168],"63":[0.707,0.212],"64":[0.757,0.267],"65":[0.791,0.332],"71":[0.441,0.833],"72":[0.344,0.807],"73":[0.276,0.765],"74":[0.242,0.706],"75":[0.210,0.641],"81":[0.559,0.833],"82":[0.659,0.807],"83":[0.728,0.765],"84":[0.764,0.706],"85":[0.793,0.641]};
+const CH={a:{img:"images/images_asnan/tooth_number.png",t:TA,ar:848/1264},c:{img:"images/images_asnan/tooth_number_child.png",t:TC,ar:1024/1536}};
+let TS={set:"a",manual:false};
+const ageSet=a=>{a=parseInt(a);return isNaN(a)?"a":a>=13?"a":"c"};
+const nearest=(t,ar,fx,fy)=>{let b=null,bd=1e9;for(const k in t){const dx=(t[k][0]-fx)*ar,dy=t[k][1]-fy,d=dx*dx+dy*dy;if(d<bd){bd=d;b=k}}return b};
+function chartDraw(){const s=CH[TS.set],box=$("#tc");if(!box)return;
+ box.innerHTML=`<img src="${s.img}" alt="مخطط الأسنان" draggable="false"><div id="tm" class="tmark" hidden></div>`;
+ box.querySelector("img").onerror=()=>{box.innerHTML='<div class="tgrid">'+Object.keys(s.t).sort().map(k=>`<button type="button" class="btn" data-a="tpick" data-id="${k}">${k}</button>`).join("")+"</div>"};
+ document.querySelectorAll("[data-a=tset]").forEach(b=>b.classList.toggle("fill",b.dataset.id===TS.set));
+ const n=$("#tnote");if(n){const a=parseInt($("#age").value);n.textContent=a>=6&&a<=12?"أسنان مختلطة (6 إلى 12 سنة): اختر المخطط الذي يحتوي السن المطلوب.":""}
+ chartSync()}
+function chartSync(){const tl=$("#tl");if(!tl)return;const v=tl.value.trim();
+ if(v&&!CH[TS.set].t[v]){const o=TS.set==="a"?"c":"a";if(CH[o].t[v]){TS.set=o;return chartDraw()}}
+ const m=$("#tm"),p=CH[TS.set].t[v];if(m){if(p){m.hidden=false;m.style.left=p[0]*100+"%";m.style.top=p[1]*100+"%"}else m.hidden=true}
+ const tn=$("#tn");if(tn)tn.textContent=v?(toothName(v)?v+" — "+toothName(v):v):""}
+function chartClear(){const tl=$("#tl");if(tl.value.trim()&&!CH[TS.set].t[tl.value.trim()]){tl.value="";const tn=$("#tn");if(tn)tn.textContent=""}}
+function chartPick(k){const tl=$("#tl");tl.value=k;tl.dispatchEvent(new Event("input",{bubbles:true}))}
+const _open2=openReq;openReq=async function(){await _open2();document.querySelector("[data-a=th7]")?.remove();TS={set:ageSet($("#age").value),manual:false};
+ $("#tn").insertAdjacentHTML("afterend",`<div class="mut" style="text-align:center;font-size:.85rem;margin-top:8px">اضغط على السن المراد معالجته في المخطط وسيُكتب رقمه تلقائياً</div>
+ <div class="tabs" style="justify-content:center;margin:8px 0 0"><button type="button" class="btn" data-a="tset" data-id="c">أسنان الأطفال</button><button type="button" class="btn" data-a="tset" data-id="a">أسنان البالغين</button></div>
+ <div class="mut" id="tnote" style="text-align:center;font-size:.8rem"></div><div class="tchart" id="tc"></div>`);
+ $("#tl").addEventListener("input",chartSync);
+ $("#age").addEventListener("input",()=>{if(!TS.manual){const s=ageSet($("#age").value);if(s!==TS.set){TS.set=s;chartClear()}}chartDraw()});
+ chartDraw()};
+document.addEventListener("click",e=>{const t=e.target.closest("[data-a]");
+ if(t?.dataset.a==="tset"){TS.set=t.dataset.id;TS.manual=true;chartClear();chartDraw();return}
+ if(t?.dataset.a==="tpick"){chartPick(t.dataset.id);return}
+ const box=e.target.closest("#tc");if(!box||!box.querySelector("img"))return;const r=box.getBoundingClientRect();if(!r.width||!r.height)return;
+ chartPick(nearest(CH[TS.set].t,CH[TS.set].ar,(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height))});
+</script>
+
+</body>
+</html>

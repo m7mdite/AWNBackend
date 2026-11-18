@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="blue">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>أسناني</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== الثيمات: نفس قيم AppColors في التطبيق ===== */
+:root,[data-theme="blue"]{--pr:#2196f3;--ac:#448aff;--lt:#40c4ff;--bg:#fff;--card:#fff;--tx:#000000de;--t2:#0000008a;--bd:#e0e0e0;--on:#fff}
+[data-theme="dark"]{--pr:#000;--ac:#b0bec5;--lt:#9fa8da;--bg:#121212;--card:#242424;--tx:#fff;--t2:#ffffffb3;--bd:#ffffff3d;--on:#121212}
+[data-theme="pink"]{--pr:#e91e63;--ac:#ff4081;--lt:#f8bbd0;--bg:#fff5f8;--card:#ffecf2;--tx:#000000de;--t2:#0000008a;--bd:#f8bbd0;--on:#fff}
+:root{--wait:#ffb300;--done:#2e9e5b;--rej:#e5484d;--sh:0 4px 14px #0003;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[data-theme="dark"]{color-scheme:dark}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;min-height:100%;font-family:"Tajawal",system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--ac);z-index:30}
+/* صور الخلفية: نفس AppImages.authBackground لكل ثيم. ضعها في images/images_asnan/ */
+.bg{position:fixed;inset:0;z-index:-1;background:linear-gradient(160deg,var(--ac),var(--lt) 55%,var(--bg))}
+[data-theme="blue"] .bg{background:url("images/images_asnan/back_blue.png") center/cover,linear-gradient(160deg,var(--ac),var(--lt) 55%,var(--bg))}
+[data-theme="dark"] .bg{background:url("images/images_asnan/back_dark.png") center/cover,linear-gradient(160deg,#37474f,#121212)}
+[data-theme="pink"] .bg{background:url("images/images_asnan/back_pink.png") center/cover,linear-gradient(160deg,var(--ac),var(--lt) 55%,var(--bg))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--ac);color:var(--on)}
+header h1{flex:1;margin:0;font-size:1.15rem}
+.ib,.dl{border:0;border-radius:20px;background:#ffffff33;color:var(--on);font:inherit;font-size:.85rem;padding:8px 12px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.th{display:flex;gap:6px}.th i{width:20px;height:20px;border-radius:50%;border:2px solid #fff;cursor:pointer}
+.layout{display:flex;max-width:1100px;margin:0 auto}
+nav{position:fixed;bottom:0;inset-inline:0;z-index:15;display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));background:linear-gradient(var(--ac),var(--lt),#ffffff8a,#fff);}
+[data-theme="dark"] nav{background:linear-gradient(#b0bec5,#9fa8da,#37474f,#121212)}
+nav button{flex:1;border:0;background:none;font:inherit;font-size:.72rem;color:#000000a0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;cursor:pointer}
+nav button span{font-size:1.3rem}nav button.on{color:var(--pr);font-weight:700}
+[data-theme="dark"] nav button.on{color:#000}
+main{flex:1;min-width:0;padding:14px 14px 150px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;box-shadow:var(--sh);padding:16px;margin-bottom:14px}
+.stats{background:linear-gradient(135deg,var(--ac),var(--pr));color:#fff;border:0}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin-top:12px}
+.row3 b{display:block;font-size:1.5rem}.row3 small{opacity:.85}
+.top{display:flex;justify-content:space-between;align-items:center;font-weight:700;gap:8px}
+.adv{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding-bottom:6px;scrollbar-width:none}
+.adv div{flex:0 0 100%;scroll-snap-align:center;height:150px;border-radius:18px;color:#fff;display:flex;align-items:flex-end;padding:12px;font-weight:700;background:var(--pr) center/cover;box-shadow:var(--sh)}
+.adv span{background:#0008;border-radius:10px;padding:4px 10px}
+.posts{display:grid;gap:12px;grid-template-columns:1fr}
+.who{display:flex;gap:8px;align-items:center;color:var(--t2);font-size:.9rem;margin-bottom:6px}
+.av{width:30px;height:30px;border-radius:50%;background:var(--lt);display:grid;place-items:center;overflow:hidden;flex:none}.av img{width:100%;height:100%;object-fit:cover}
+.pimg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin:8px 0}.pimg img{width:100%;height:140px;object-fit:cover;border-radius:12px}
+.meta{display:flex;gap:10px;color:var(--t2);font-size:.85rem}
+.meta button{border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
+.tabs button{flex:0 0 auto;border:1px solid var(--bd);background:var(--card);color:var(--t2);font:inherit;padding:8px 14px;border-radius:16px;cursor:pointer}
+.tabs button.on{background:var(--ac);color:var(--on);border-color:var(--ac)}
+.req{display:flex;gap:12px;align-items:center}.dot{width:10px;height:10px;border-radius:50%;flex:none}.grow{flex:1;min-width:0}
+small,.mut{color:var(--t2)}.empty{text-align:center;color:var(--t2);padding:34px 10px}
+.btn,.fab button{font:inherit;cursor:pointer;border-radius:22px;padding:11px 20px;border:1.5px solid var(--pr);background:var(--card);color:var(--pr);font-weight:700}
+[data-theme="dark"] .btn,[data-theme="dark"] .fab button{border-color:var(--ac);color:var(--ac)}
+.btn.fill{background:var(--pr);color:#fff;border-color:var(--pr)}[data-theme="dark"] .btn.fill{background:var(--ac);color:#000}
+.btn:disabled{opacity:.5}
+.fab{position:fixed;inset-inline:0;bottom:calc(76px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:14;pointer-events:none}
+.fab button{pointer-events:auto;box-shadow:0 0 8px var(--ac)}
+.list button{display:flex;width:100%;gap:12px;align-items:center;border:0;background:none;color:inherit;font:inherit;padding:14px 4px;border-bottom:1px solid var(--bd);cursor:pointer;text-align:start}
+.list button:last-child{border:0}
+dialog{border:0;border-radius:20px;padding:20px;width:min(94vw,480px);max-height:90vh;background:var(--card);color:var(--tx);box-shadow:0 10px 40px #0006}
+dialog::backdrop{background:#0007}dialog h2{margin:0 0 8px;font-size:1.15rem}
+label{display:block;font-size:.88rem;margin:10px 0 4px;color:var(--t2)}
+input,select,textarea{width:100%;font:inherit;padding:10px 12px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
+input[type=range]{padding:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.acts{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.auth{max-width:440px;margin:0 auto}
+.out{margin-top:10px;padding:10px;border-radius:12px;background:var(--bg);font-size:.85rem;border:1px dashed var(--bd)}
+.toast{position:fixed;inset-inline:0;bottom:calc(140px + env(safe-area-inset-bottom,0px));margin:auto;width:max-content;max-width:90vw;background:#14233a;color:#fff;padding:10px 18px;border-radius:20px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none}.toast.show{opacity:1}
+@media(min-width:900px){
+ nav{position:sticky;top:calc(58px + env(safe-area-inset-top,0px));inset:auto;flex-direction:column;gap:6px;width:200px;height:max-content;margin:14px 0 0 14px;padding:10px;border-radius:18px;box-shadow:var(--sh);align-self:flex-start;background:var(--card)!important}
+ nav button{flex:none;flex-direction:row;gap:10px;font-size:.95rem;padding:12px 14px;color:var(--t2)}nav button.on{color:var(--pr)!important}
+ main{padding-bottom:110px}.fab{bottom:24px}.posts{grid-template-columns:1fr 1fr}.adv div{flex-basis:calc(50% - 6px)}.toast{bottom:90px}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<header>
+  <h1>أسناني</h1>
+  <div class="th" aria-label="الثيم"><i data-t="blue" style="background:#448aff"></i><i data-t="dark" style="background:#121212"></i><i data-t="pink" style="background:#ff4081"></i></div>
+  <a class="dl" id="dlTop" download>⬇ تحميل التطبيق</a>
+</header>
+<div class="layout"><nav id="nav"></nav><main id="main"></main></div>
+<div class="fab" id="fab"><button data-a="newreq">➕ تقديم طلب علاج</button></div>
+
+<dialog id="lockD"><h2>تنبيه</h2><p>هذه الميزة متاحة فقط للمستخدمين المسجلين.</p>
+ <div class="acts"><button class="btn" data-a="close">إلغاء</button><button class="btn fill" data-a="login">تسجيل الدخول</button></div></dialog>
+<dialog id="reqD"></dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== إعدادات: عدّلها فقط ===== */
+const CFG={API:"http://localhost:5000/api",APK:"app-release.apk"};
+const $=s=>document.querySelector(s);
+const h=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const url=u=>/^https?:\/\//.test(u||"")?h(u):"";
+const LS={g:k=>{try{return localStorage.getItem(k)}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},d:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+const S={tab:0,view:"app",mode:"login",rt:0,dash:null,reqs:{},posts:[],page:1,pages:1,treat:[],token:LS.g("token"),user:JSON.parse(LS.g("user")||"null")};
+const TABS=[["🏠","الصفحة الرئيسية"],["📋","الطلبات"],["📰","المنشورات"],["👤","الملف الشخصي"]];
+const RT=["قيد الإنتظار","قيد المعالجة","تمت معالجتها","تم رفضها"],RE=["pending","processing","finished","rejected"],RC=["var(--wait)","var(--ac)","var(--done)","var(--rej)"];
+$("#dlTop").href=CFG.APK;
+const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2600)};
+const setTheme=t=>{document.documentElement.dataset.theme=t;LS.s("app_theme",t)};setTheme(LS.g("app_theme")||"blue");
+
+/* ===== الشبكة: نفس Crud.dart (توكن + مهلة + تمييز الأخطاء + 401) ===== */
+async function api(path,{method="GET",body,form,auth=true,ms=20000}={}){
+  const hd={Accept:"application/json"};
+  if(S.token)hd.Authorization="Bearer "+S.token;
+  let bd;if(form){bd=form}else if(body){hd["Content-Type"]="application/json";bd=JSON.stringify(body)}
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),ms);
+  try{
+    const r=await fetch(CFG.API+path,{method,headers:hd,body:bd,signal:ctl.signal});
+    let d;try{d=await r.json()}catch(e){return{ok:false,msg:"رد غير صالح من الخادم"}}
+    if(r.ok)return{ok:true,d};
+    if(r.status===401&&auth&&S.token){endSession("انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى")}
+    return{ok:false,msg:d.message||"فشل في الاتصال بالخادم",st:r.status};
+  }catch(e){return{ok:false,msg:e.name==="AbortError"?"انتهت مهلة الاتصال":"لا يوجد اتصال بالإنترنت أو تعذر الاتصال بالخادم"}}
+  finally{clearTimeout(to)}
+}
+function endSession(m){["token","user"].forEach(LS.d);S.token=null;S.user=null;S.tab=0;S.reqs={};S.view="app";render();loadHome();if(m)toast(m)}
+
+/* ===== التحميل ===== */
+async function loadHome(){const r=await api("/dashboard");S.dash=r.ok?r.d.data:{err:r.msg};if(S.tab===0&&S.view==="app")render()}
+async function loadReqs(i){if(!S.token)return;const r=await api("/request/"+RE[i]);S.reqs[i]=r.ok?(r.d.data||[]):{err:r.msg};if(S.tab===1&&S.rt===i)render()}
+async function loadPosts(more){if(!S.token)return;const p=more?S.page+1:1;const r=await api(`/posts?page=${p}&limit=10&sort=createdAt&order=desc`);
+  if(!r.ok)return toast(r.msg);S.page=p;S.pages=r.d.pagination?.total_pages||1;S.posts=more?S.posts.concat(r.d.data||[]):(r.d.data||[]);if(S.tab===2)render()}
+
+/* ===== العرض ===== */
+const postCard=p=>`<article class="card"><div class="who"><span class="av">${url(p.publisher?.profile_photo)?`<img src="${url(p.publisher.profile_photo)}" alt="">`:"👤"}</span>${h(p.publisher?.full_name||"")}${p.publisher?.is_verified?" ✔️":""}</div>
+<div>${h(p.content)}</div>${(p.images||[]).length?`<div class="pimg">${p.images.map(i=>`<img loading="lazy" src="${url(i.url)}" alt="">`).join("")}</div>`:""}
+<div class="meta"><button data-a="like" data-id="${h(p._id)}">👍 ${p.count_likes||0}</button><button data-a="dislike" data-id="${h(p._id)}">👎 ${p.count_dislikes||0}</button><span>💬 ${p.count_comments||0}</span></div></article>`;
+function home(){const d=S.dash;
+  if(!d)return `<div class="card empty">جاري التحميل…</div>`;
+  if(d.err)return `<div class="card empty">${h(d.err)}<br><br><button class="btn" data-a="reload">إعادة المحاولة</button></div>`;
+  const q=d.requests||{},u=d.users,m=d.my_cases;
+  return `<section class="card stats"><div class="top"><span>📊 طلبات العلاج</span><small style="color:#fff">الإجمالي: ${q.total??0}</small></div>
+<div class="row3"><div><b>${q.pending??0}</b><small>انتظار</small></div><div><b>${q.processing??0}</b><small>معالجة</small></div><div><b>${q.finished??0}</b><small>مكتملة</small></div></div>
+${u?`<div style="margin-top:12px;font-size:.85rem">👤 عدد المستخدمين الكلي: <b>${u.count_users??0}</b></div>`:""}
+${m&&S.token?`<div style="margin-top:6px;font-size:.85rem">حالاتي: انتظار ${m.pending??0} · معالجة ${m.in_process??0} · مكتملة ${m.finished??0}</div>`:""}</section>
+<section class="card top" style="flex-wrap:wrap"><span>📱 حمّل تطبيق أسناني على أندرويد</span><a class="btn fill" href="${h(CFG.APK)}" download style="text-decoration:none">⬇ تحميل التطبيق</a></section>
+${(d.adv?.data||[]).length?`<div class="adv">${d.adv.data.map(a=>`<div style="${url(a.image?.url)?`background-image:url('${url(a.image.url)}')`:""}"><span>${h(a.content)}</span></div>`).join("")}</div>`:""}
+${(d.top_posts?.data||[]).length?`<div class="top" style="margin:16px 4px 10px"><span>أفضل المنشورات</span><button class="btn" style="padding:4px 14px" data-a="tab" data-i="2">عرض الكل</button></div><div class="posts">${d.top_posts.data.map(postCard).join("")}</div>`:""}`}
+function reqs(){const l=S.reqs[S.rt];
+  return `<div class="top" style="margin:0 4px 10px"><span>طلباتي</span><button class="btn" style="padding:4px 14px" data-a="rr">تحديث</button></div>
+<div class="tabs">${RT.map((t,i)=>`<button class="${i===S.rt?"on":""}" data-a="rt" data-i="${i}">${t}</button>`).join("")}</div>`+
+  (!l?`<div class="card empty">جاري التحميل…</div>`:l.err?`<div class="card empty">${h(l.err)}</div>`:!l.length?`<div class="card empty">لا توجد طلبات هنا</div>`:
+  l.map(r=>{const q=r.Requestion||{},ct=r.case_type?.case_type||r.case_type||"";const st=[r.student,r.overseer].find(x=>x)?.first_name;
+   return `<div class="card req"><span class="dot" style="background:${RC[S.rt]}"></span><div class="grow"><b>${h(typeof ct==="string"?ct:"")}</b><br><small>السن ${h(q.tooth_location||"-")} · عمر ${h(q.age||"-")}${st?" · الطالب: "+h(st):""}</small>${r.rating?`<br><small>⭐ ${h(r.rating)}</small>`:""}</div><small>${RT[S.rt]}</small></div>`}).join(""))}
+function posts(){return `<div class="posts">${S.posts.map(postCard).join("")||'<div class="card empty">لا توجد منشورات</div>'}</div>${S.page<S.pages?`<div style="text-align:center;margin:10px"><button class="btn" data-a="more">عرض المزيد</button></div>`:""}`}
+function prof(){const u=S.user||{};const n=[u.first_name,u.father_name,u.last_name].filter(Boolean).join(" ");
+  return `<section class="card"><div class="who" style="font-size:1.05rem;color:var(--tx)"><span class="av" style="width:56px;height:56px;font-size:1.6rem">${url(u.profile_photo?.url)?`<img src="${url(u.profile_photo.url)}" alt="">`:"👤"}</span><div><b>${h(n)}</b><br><small>${h(u.email||"")}</small></div></div></section>
+<section class="card list"><button data-a="th">🎨 تبديل الثيم</button><button data-a="out">🚪 تسجيل الخروج</button></section>`}
+function auth(){const L=S.mode==="login",f=(id,l,t="text")=>`<label>${l}</label><input id="${id}" type="${t}" autocomplete="off">`;
+  return `<div class="auth card"><h2>${L?"تسجيل الدخول":"إنشاء حساب جديد"}</h2>${L?"":f("fn","الاسم")+f("fa","اسم الأب")+f("ln","الكنية")+`<label>الجنس</label><select id="ge"><option value="male">ذكر</option><option value="female">أنثى</option></select>`}
+${f("em","البريد الإلكتروني","email")}${f("pw","كلمة المرور","password")}
+<div class="acts" style="justify-content:space-between"><button class="btn" data-a="mode">${L?"إنشاء حساب":"لدي حساب"}</button><button class="btn fill" id="go" data-a="submitAuth">${L?"دخول":"تسجيل"}</button></div>
+<div style="margin-top:10px"><button class="btn" data-a="guest" style="width:100%">المتابعة كضيف</button></div></div>`}
+function render(){
+  $("#nav").style.display=S.view==="auth"?"none":"";
+  $("#nav").innerHTML=TABS.map((t,i)=>`<button class="${i===S.tab?"on":""}" data-a="tab" data-i="${i}"><span>${t[0]}</span>${t[1]}</button>`).join("");
+  $("#main").innerHTML=S.view==="auth"?auth():[home,reqs,posts,prof][S.tab]();
+  $("#fab").style.display=S.view==="app"&&S.token&&S.tab<2?"flex":"none";
+}
+function go(i){if(!S.token&&i!==0)return $("#lockD").showModal();S.tab=i;render();scrollTo({top:0});
+  if(i===0)loadHome();if(i===1)loadReqs(S.rt);if(i===2)loadPosts()}
+
+/* ===== المصادقة: نفس login_controller / register_controller ===== */
+async function submitAuth(){const v=i=>$("#"+i)?.value.trim(),L=S.mode==="login",b=$("#go");
+  if(!v("em")||!v("pw"))return toast("الرجاء ملء جميع الحقول");
+  if(!L&&(!v("fn")||!v("fa")||!v("ln")))return toast("الرجاء ملء جميع الحقول");
+  b.disabled=true;
+  const r=L?await api("/auth/login",{method:"POST",body:{email:v("em"),password:v("pw")},auth:false})
+    :await api("/auth/register",{method:"POST",body:{email:v("em"),password:v("pw"),first_name:v("fn"),father_name:v("fa"),last_name:v("ln"),gender:v("ge"),role:"patient"},auth:false});
+  b.disabled=false;
+  if(!r.ok)return toast(r.msg);
+  if(r.d.status&&r.d.status!=="success")return toast(r.d.message||"حدث خطأ غير معروف");
+  if(!L){S.mode="login";render();$("#em").value=v("em")||"";return toast("تم إنشاء الحساب، سجّل الدخول الآن")}
+  const u=r.d.data;if(u.role!=="patient")return toast(u.role==="student"?"هذا الموقع مخصص للمرضى، استخدم التطبيق للطلاب":"هذا التطبيق غير مخصص لك");
+  S.token=r.d.token;S.user=u;LS.s("token",S.token);LS.s("user",JSON.stringify(u));S.view="app";S.tab=0;render();loadHome();toast("اهلا بك "+(u.first_name||""));
+}
+
+/* ===== نموذج طلب العلاج: نفس مفاتيح treatment_request_model.toJson ===== */
+async function openReq(){
+  if(!S.treat.length){const r=await api("/admin/treatment");if(r.ok)S.treat=(r.d.data||[]).map(t=>{const c=(t.case_type&&typeof t.case_type==="object")?t.case_type:t;return{id:c._id||t._id,n:c.case_type||c.name||""}})}
+  const yn=id=>`<select id="${id}"><option value="">اختر</option><option value="1">نعم</option><option value="0">لا</option></select>`;
+  $("#reqD").innerHTML=`<h2>تقديم طلب علاج</h2>
+<label>اختر نوع المعالجة</label><select id="ct"><option value="">اختر</option>${S.treat.map(t=>`<option value="${h(t.id)}">${h(t.n)}</option>`).join("")}</select>
+<div class="two"><div><label>عمر المريض</label><input id="age" type="number" min="1" max="110" inputmode="numeric"></div>
+<div><label>الجنس</label><select id="ge2"><option value="">اختر</option><option value="male">ذكر</option><option value="female">أنثى</option></select></div></div>
+<div id="preg" hidden><label>هل أنت حامل؟</label>${yn("pg")}</div>
+<label>شدة الألم: <b id="sv">0</b> / 10</label><input id="sev" type="range" min="0" max="10" value="0">
+<div id="ptw" hidden><label>متى يحصل الألم؟</label><input id="pt"></div>
+<label>رقم السن</label><input id="tl" placeholder="مثال: 16" inputmode="numeric">
+<label>هل عولج هذا السن من قبل؟</label>${yn("prev")}
+<label>أمراض مزمنة؟</label>${yn("chr")}<input id="chn" placeholder="اذكر اسم المرض" hidden>
+<label>أدوية أو مكملات؟</label>${yn("med")}<input id="men" placeholder="اذكر اسم الدواء أو المكمل" hidden>
+<label>إرفاق صورة للسن</label><input id="ph" type="file" accept="image/*">
+<label>ملاحظات</label><textarea id="nt" rows="2"></textarea>
+<div class="acts" style="justify-content:flex-start"><button class="btn" data-a="p1">هل يمكن علاجها؟</button><button class="btn" data-a="p2">نوع المعالجة المتوقع</button></div>
+<div class="out" id="out">التنبؤات اختيارية وهي تقدير مبدئي وليست تشخيصاً طبياً.</div>
+<div class="acts"><button class="btn" data-a="close">إلغاء</button><button class="btn fill" id="snd" data-a="send">إرسال</button></div>`;
+  $("#reqD").showModal();
+}
+document.addEventListener("input",e=>{const t=e.target;
+  if(t.id==="sev"){$("#sv").textContent=t.value;$("#ptw").hidden=t.value==="0"}});
+document.addEventListener("change",e=>{const t=e.target;
+  if(t.id==="ge2")$("#preg").hidden=t.value!=="female";
+  if(t.id==="chr")$("#chn").hidden=t.value!=="1";
+  if(t.id==="med")$("#men").hidden=t.value!=="1"});
+function payload(needType){const g=i=>$("#"+i).value.trim(),sev=+g("sev"),gen=g("ge2");
+  if(needType&&!g("ct")){toast("الرجاء اختيار نوع المعالجة");return}
+  if(!g("age")){toast("الرجاء إدخال العمر أولاً");return}
+  if(!gen){toast("الرجاء تحديد الجنس أولاً");return}
+  if(sev>0&&!g("pt")){toast("الرجاء تحديد وقت الألم أولاً");return}
+  if(!g("tl")){toast("الرجاء إدخال موقع/رقم السن أولاً");return}
+  if(!g("prev")){toast("حدد في ما إذا قمت بمعالجة هذا السن من قبل أم لا");return}
+  const p={pain_severity:sev,tooth_location:g("tl"),gender:gen,previous_treatment:g("prev")==="1",age:g("age")};
+  if(g("ct"))p.case_type=g("ct");if(sev>0)p.pain_time=g("pt");
+  if(gen==="female"&&g("pg"))p.is_pregnant=g("pg")==="1";
+  if(g("chr")==="1"&&g("chn"))p.chronic_diseases=g("chn");
+  if(g("med")==="1"&&g("men"))p.medicines=g("men");
+  if(g("nt"))p.notes=g("nt");return p}
+const toForm=(p,field,file)=>{const f=new FormData();for(const k in p)f.append(k,String(p[k]));if(file)f.append(field,file);return f};
+async function sendReq(){const p=payload(true);if(!p)return;const b=$("#snd"),file=$("#ph").files[0];b.disabled=true;
+  const r=file?await api("/request",{method:"POST",form:toForm(p,"photo",file),ms:60000}):await api("/request",{method:"POST",body:p});b.disabled=false;
+  if(!r.ok)return toast(r.msg||"فشل في إرسال الطلب. الرجاء المحاولة مرة أخرى");
+  $("#reqD").close();toast("تم إرسال الطلب بنجاح");S.reqs={};S.tab=1;S.rt=0;render();loadReqs(0);loadHome()}
+async function predict(kind){const p=payload(false);if(!p)return;const o=$("#out");o.textContent="جاري التنبؤ…";let r;
+  if(kind===1)r=await api("/ml/predict",{method:"POST",body:p});
+  else{const q={age:p.age,gender:p.gender,pain_severity:p.pain_severity,pain_time:p.pain_time||"",tooth_location:p.tooth_location,is_pregnant:!!p.is_pregnant,previous_treatment:p.previous_treatment,takes_medication:!!p.medicines,medication_type:0};
+    r=await api("/treatment-ml/predict-with-image",{method:"POST",form:toForm(q,"image",$("#ph").files[0]),ms:60000})}
+  if(!r.ok||!r.d.data){o.textContent="تعذر التنبؤ، حاول مرة أخرى";return}
+  const d=r.d.data,c=d.confidence!=null?` (الثقة ${Math.round(d.confidence*(d.confidence<=1?100:1))}%)`:"";
+  o.textContent=(kind===1?"هل يمكن علاجها؟ ":"نوع المعالجة المتوقع: ")+(d.prediction||d.case_type||d.predicted_case_type||JSON.stringify(d))+c+" — تقدير مبدئي وليس تشخيصاً."}
+
+/* ===== الأحداث ===== */
+document.addEventListener("click",async e=>{
+  const th=e.target.closest("[data-t]");if(th)return setTheme(th.dataset.t);
+  const t=e.target.closest("[data-a]");if(!t)return;const a=t.dataset.a,i=+t.dataset.i;
+  if(a==="tab")go(i);
+  else if(a==="rt"){S.rt=i;render();if(!S.reqs[i])loadReqs(i)}
+  else if(a==="rr"){S.reqs[S.rt]=null;render();loadReqs(S.rt)}
+  else if(a==="reload"){S.dash=null;render();loadHome()}
+  else if(a==="more")loadPosts(true);
+  else if(a==="close")t.closest("dialog").close();
+  else if(a==="login"){$("#lockD").close();S.view="auth";S.mode="login";render()}
+  else if(a==="mode"){S.mode=S.mode==="login"?"register":"login";render()}
+  else if(a==="guest"){S.view="app";render()}
+  else if(a==="submitAuth")submitAuth();
+  else if(a==="newreq")openReq();
+  else if(a==="send")sendReq();
+  else if(a==="p1")predict(1);else if(a==="p2")predict(2);
+  else if(a==="th"){const o=["blue","dark","pink"];setTheme(o[(o.indexOf(document.documentElement.dataset.theme)+1)%3])}
+  else if(a==="out"){await api("/auth/logout",{method:"POST",body:{},auth:false,ms:5000});endSession()}
+  else if(a==="like"||a==="dislike"){const r=await api(`/posts/${t.dataset.id}/${a}`,{method:"POST",body:{}});if(r.ok)loadPosts();else toast(r.msg)}
+});
+S.view==="app"&&render();loadHome();if(S.token)loadReqs(0);
+</script>
+</body>
+</html>
