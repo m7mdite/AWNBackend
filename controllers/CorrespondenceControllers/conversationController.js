@@ -24,7 +24,7 @@ const formatOtherPartyProfile = (profile, userId, role) => {
     return {
         userId: userId,
         full_name: `${profile.first_name} ${profile.father_name} ${profile.last_name}`.trim(),
-        profile_photo:profile.profile_photo?.url? {url:`${process.env.BASE_URL}/${profile.profile_photo.url}`}:null,
+        profile_photo: profile.profile_photo?.url ? { url: formateImageUrl(profile.profile_photo.url) } : null,
         role: role,
         
     };

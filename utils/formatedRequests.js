@@ -4,15 +4,16 @@
  * @param {Object} request - Request document
  * @returns {Object} Formatted request
  */
+const { formateImageUrl } = require('./formate');
 const formatRequestResponse = (req, request) => {
     // بناء رابط الصورة الكامل
     let photoUrl = null;
     if (request.photo?.url) {
-        photoUrl = `${process.env.BASE_URL}/${request.photo.url}`;
+        photoUrl = formateImageUrl(request.photo.url);
     }
-    
+
     console.log(`case type ${JSON.stringify(request.case_type)}`); // تعديل لطباعة الكائن كامل
-    
+
     return {
         _id: request._id,
         status: "pending",

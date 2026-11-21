@@ -4,7 +4,6 @@ const dotenv = require('dotenv');
 const http = require('http');
 const userRoutes = require('./routes/users');
 const socket = require('./socket/init');
-const { updateBaseUrlFromRequest } = require('./utils/updateEnv');
 
 dotenv.config();
 
@@ -18,16 +17,7 @@ app.use(express.static('public'));
 const helmet = require('helmet');
 
 
-let isBaseUrlSet = false;
 
-app.use((req, res, next) => {
-    if (!isBaseUrlSet) {
-        const baseUrl = updateBaseUrlFromRequest(req);
-        console.log(`✅ BASE_URL updated to: ${baseUrl}`);
-        isBaseUrlSet = true;
-    }
-    next();
-});
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 

@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const Advertisement = require('../models/Advertisement');
-
+const { formateImageUrl } = require('../utils/formate');
 // ============================================================
 // 📢 ADVERTISEMENTS MANAGEMENT
 // ============================================================
@@ -49,7 +49,7 @@ let imageUrl;
         image: {url:imageUrl},
         created_by: req.user.id
     });
-advertisement.image.url=`${process.env.BASE_URL}/${advertisement.image.url}`
+    if (advertisement.image?.url) advertisement.image.url = formateImageUrl(advertisement.image.url);
     res.status(201).json({
         status: 'success',
         message: 'تم إنشاء الإعلان بنجاح',
@@ -65,9 +65,9 @@ advertisement.image.url=`${process.env.BASE_URL}/${advertisement.image.url}`
 exports.getAllAdvertisements = asyncHandler(async (req, res) => {
     const advertisements=await Advertisement.find();
 
-    advertisements.map((adv)=>{
-        adv.image.url=`${process.env.BASE_URL}/${adv.image.url}`
-    })
+    advertisements.forEach((adv) => {
+    if (adv.image?.url) adv.image.url = formateImageUrl(adv.image.url);
+});
     res.status(200).json({
         status: 'success',
         message: 'هذه هي جميع الإعلانات',

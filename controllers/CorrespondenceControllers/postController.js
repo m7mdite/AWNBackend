@@ -6,8 +6,8 @@ const Comment = require('../../models/Correspondence/Comment');
 const getUserProfile = require('../../utils/users');
 const fs = require('fs');
 const path = require('path');
-const { formatPost } = require('../../utils/formate');
 const Pending_posts = require('../../models/Correspondence/Pending_posts');
+const { formatPost, formateImageUrl } = require('../../utils/formate');
 
 // ============================================================
 // 📦 HELPER FUNCTIONS
@@ -85,8 +85,7 @@ const formatComment = async (comment, reqUserId) => {
             user: {
                 _id: commentObj.user,
                 full_name: fullName,
-                profile_photo: userProfile?.profile_photo ?.url? 
-                    `${process.env.BASE_URL}/${userProfile.profile_photo.url}` : null,
+                profile_photo: formateImageUrl(userProfile?.profile_photo?.url) || null,
                 gender: userProfile?.gender || null,
                 is_verified: userProfile?.is_verified || false
             }

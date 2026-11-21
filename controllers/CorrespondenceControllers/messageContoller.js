@@ -2,7 +2,7 @@ const asyncHandler=require('express-async-handler');
 const Conversation = require('../../models/Correspondence/Conversation');
 const Message = require('../../models/Correspondence/Message');
 const socket = require('../../socket/init');
-
+const { formateImageUrl } = require('../../utils/formate');
 /**
  * @description send message 
  * @route api/message/:converersation
@@ -55,7 +55,7 @@ const newMessage=await Message.create({
     sender:userId
 })
 await conversation.save();
-
+if (req.file) newMessage.content = formateImageUrl(newMessage.content);
 console.log(`the other party is ${otherPartyId}`)
 const io = socket.getIO();
 console.log(`the io is ${io}`)
@@ -65,9 +65,7 @@ if (io) {
   });
  
 }
-if(req.file){
-   newMessage.content=`${process.env.BASE_URL}/${newMessage.content}`
-    }
+
 res.status(201).json({
     status:'success',
     message:'تم ارسال الرسالة بنجاح ',

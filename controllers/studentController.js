@@ -6,10 +6,10 @@ const { Practial_lesson } = require('../models/Practical_lesson');
 const Treatment = require('../models/Treatment');
 const socket = require('../socket/init');
 const { Pending_request } = require('../models/Pending_request');
-const {  Overseer_profile } = require('../models/Overseer_profile');
-const InProcess_request=require('../models/InProcess_request');
+const { Overseer_profile } = require('../models/Overseer_profile');
+const InProcess_request = require('../models/InProcess_request');
 const { formatRequestResponse } = require('../utils/formatedRequests');
-
+const { formateImageUrl } = require('../utils/formate');
 // ============================================================
 // 🎓 STUDENT CONTROLLER
 // ============================================================
@@ -83,7 +83,7 @@ module.exports.getCourseOverseers = asyncHandler(async (req, res) => {
 
     overseers.map(overseer => {
         if (overseer.profile_photo && overseer.profile_photo.url) {
-            overseer.profile_photo.url = `${process.env.BASE_URL}/${overseer.profile_photo.url}`;
+            overseer.profile_photo.url = formateImageUrl(overseer.profile_photo.url);
         }
     });
 
@@ -100,34 +100,34 @@ module.exports.getCourseOverseers = asyncHandler(async (req, res) => {
  * @access Private (Student or Admin)
  */
 module.exports.showAllRequests = asyncHandler(async (req, res) => {
-    const userRole=req.user.role
-let requests
-let message;
-const isAdmin=req.user.isAdmin
-if(userRole=='student' || isAdmin){
-     requests = await Pending_request.find()
-        .populate({
-            path: 'case_type',
-            select: '_id case_type course',
-            populate: { path: 'course', select: '_id course_name' }
-        })
-        .populate({
-            path: 'user',
-            model: 'Patient_profile',
-            foreignField: 'user',
-            localField: 'user',
-            select: '-_id first_name father_name last_name'
-        });
-        message='هذه هي جميع الطلبات الخاصة بالمرضى'
+    const userRole = req.user.role
+    let requests
+    let message;
+    const isAdmin = req.user.isAdmin
+    if (userRole == 'student' || isAdmin) {
+        requests = await Pending_request.find()
+            .populate({
+                path: 'case_type',
+                select: '_id case_type course',
+                populate: { path: 'course', select: '_id course_name' }
+            })
+            .populate({
+                path: 'user',
+                model: 'Patient_profile',
+                foreignField: 'user',
+                localField: 'user',
+                select: '-_id first_name father_name last_name'
+            });
+        message = 'هذه هي جميع الطلبات الخاصة بالمرضى'
     }
-    else if(userRole=='patient'){
+    else if (userRole == 'patient') {
         requests = await Pending_request.find({ user: req.user.id })
-        .populate('case_type', '_id case_type');
-        message='أنت مريض ...يمكنك رؤية طلباتك فقط '
+            .populate('case_type', '_id case_type');
+        message = 'أنت مريض ...يمكنك رؤية طلباتك فقط '
     }
     console.log(requests)
-    const formattedRequests = requests.map((item)=>{
-       return  formatRequestResponse(req,item)
+    const formattedRequests = requests.map((item) => {
+        return formatRequestResponse(req, item)
     })
 
     res.status(200).json({
@@ -147,7 +147,7 @@ module.exports.acceptRequest = asyncHandler(async (req, res) => {
     const { id, overseer: overseerId } = req.params;
     const studentId = req.user.id;
 
-    if (req.user.role !== 'student' ) {
+    if (req.user.role !== 'student') {
         return res.status(403).json({
             status: 'error',
             message: 'غير مسموح، هذه الخدمة للطلاب فقط'

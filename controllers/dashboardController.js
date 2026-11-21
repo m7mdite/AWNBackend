@@ -11,19 +11,14 @@ const Student_profile = require('../models/Student_profile');
 const Patient_profile = require('../models/Patient_profile');
 const { Overseer_profile } = require('../models/Overseer_profile');
 const getCaseCounts = require('../utils/count_cases');
-const { formatPost } = require('../utils/formate');
+const { formatPost, formateImageUrl } = require('../utils/formate');
 
 // ============================================================
 // 📦 HELPER FUNCTIONS (دوال مساعدة)
 // ============================================================
 
-/**
- * Build full image URL from request
- */
-const buildImageUrl = (imagePath) => {
-    if(imagePath){
-    return `${process.env.BASE_URL}/${imagePath}`;}
-};
+
+const buildImageUrl = (imagePath) => formateImageUrl(imagePath);
 
 
 

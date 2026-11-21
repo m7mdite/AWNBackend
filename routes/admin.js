@@ -7,6 +7,7 @@ const { getAllPatients } = require('../controllers/adminControllers/patientsCont
 const { createCourse, getCourses, addTreatment, getAllTreatments, deleteTreatment, addPracticalLesson, getAllLessons, updatePracialLesson } = require('../controllers/adminControllers/courses_and_treatments');
 const { adminUpdateInProcess } = require('../controllers/adminControllers/requestions_controller');
 const { notifyAll } = require('../controllers/adminControllers/notifyController');
+const { getStats } = require('../controllers/adminControllers/statsController');
 
 const router=express.Router();
 
@@ -52,5 +53,8 @@ router.put('/in-proccess/:id',adminUpdateInProcess)
 
 //  notify
 router.post('/notify',notifyAll)
+
+// stats (إحصاءات لوحة الأدمن)
+router.get('/stats',getStats)
 
 module.exports=router

@@ -5,7 +5,7 @@ const Course = require('../../models/Course');
 const { User, validateAddOverseer } = require('../../models/User');
 const {  Overseer_profile } = require('../../models/Overseer_profile');
 const { Practial_lesson } = require('../../models/Practical_lesson');
-
+const { formateImageUrl } = require('../../utils/formate');
 // ============================================================
 // 👨‍🏫 OVERSEERS MANAGEMENT
 // ============================================================
@@ -34,9 +34,9 @@ module.exports.getAllOverseers = asyncHandler(async (req, res) => {
             email: user?.email || null
         };
     });
-formattedOverseers.map((overseer)=>{
-if(overseer.profile_photo?.url){overseer.profile_photo.url=`${process.env.BASE_URL}/${overseer.profile_photo.url}`}
-})
+formattedOverseers.forEach((o) => {
+    if (o.profile_photo?.url) o.profile_photo.url = formateImageUrl(o.profile_photo.url);
+});
     res.status(200).json({
         status: 'success',
         count: formattedOverseers.length,
