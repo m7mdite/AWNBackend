@@ -1,5 +1,5 @@
-const { object } = require('joi');
 const mongoose = require('mongoose');
+const { casePhotoSchema } = require('./CasePhotoSchema');
 
 const FinishedSchema = new mongoose.Schema({
     // بيانات الطلب الأصلية (يُفضل أن تطابق نفس الحقول في InProcess)
@@ -15,20 +15,25 @@ const FinishedSchema = new mongoose.Schema({
     },
     student: {
         type: mongoose.Schema.Types.ObjectId,
-        ref:'User',
+        ref: 'User',
         required: true
     },
-    Requestion:{
-        type:Object
+    Requestion: {
+        type: Object
     },
-    case_type:{
+    case_type: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Treatment', // المشرف الذي أنهى الطلب
+        ref: 'Treatment',
         required: true
-
     },
 
-    // حقول التقييم والإغلاق الجديدة
+    // صور الحالة (تُنسخ من InProcess عند الإنهاء)
+    photos: {
+        before: { type: casePhotoSchema, default: undefined },
+        after: { type: casePhotoSchema, default: undefined }
+    },
+
+    // حقول التقييم والإغلاق
     rating: {
         type: Number,
         required: [true, 'الرجاء إضافة تقييم'],
@@ -49,6 +54,11 @@ const FinishedSchema = new mongoose.Schema({
 }, {
     timestamps: true // لإنشاء createdAt و updatedAt تلقائياً
 });
+
+// فهارس للبورتفوليو (حسب الطالب / المشرف / المريض مرتبة بتاريخ الإنهاء)
+FinishedSchema.index({ student: 1, completedAt: -1 });
+FinishedSchema.index({ overseer: 1, completedAt: -1 });
+FinishedSchema.index({ patient: 1, completedAt: -1 });
 
 const Finished_request = mongoose.model('Finished_request', FinishedSchema);
 

@@ -3,6 +3,7 @@ const router = express.Router();
 const {uploadProfilePhoto}=require('../Middlewares/upload')
 const verifyToken = require('../Middlewares/verifyToken');
 const { updateProfilePhoto, updateUserProfile, showUserProfile, getProfile } = require('../controllers/usercontroller');
+const { getPortfolio } = require('../controllers/portfolioController');
 router.use((req, res, next) => {
     console.log('📡 User Route:', req.method, req.originalUrl);
     console.log('📝 Params:', req.params);
@@ -17,6 +18,9 @@ router.put('/', verifyToken,updateUserProfile);
 //show User Profile
 router.get('/',verifyToken,showUserProfile)
 
+// portfolio (completed cases with before/after photos). :id can be 'me'
+router.get('/:id/portfolio',verifyToken,getPortfolio)
+
 // get profile
 router.get('/:id',verifyToken,getProfile)
 
@@ -24,3 +28,4 @@ router.get('/:id',verifyToken,getProfile)
  
 
 module.exports = router;
+

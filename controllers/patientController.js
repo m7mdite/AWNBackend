@@ -17,11 +17,11 @@ const { formatRequestResponse } = require('../utils/formatedRequests');
  */
 const formatRequestWithPatient = (req, request, isAdmin = false) => {
     const formattedRequest = formatRequestResponse(req, request);
-    
+
     if (isAdmin && request.user) {
         formattedRequest.patient = request.user;
     }
-    
+
     return formattedRequest;
 };
 
@@ -143,8 +143,7 @@ module.exports.updateRequest = asyncHandler(async (req, res) => {
             message: 'هذه الحالة ليست لك'
         });
     }
-
-    const updatableFields = ['pain_severity', 'pain_time', 'tooth_location', 'gender', 'is_pregnant', 'case_type', 'notes', 'age','chronic_diseases','previous_treatment','medicines'];
+    const updatableFields = ['pain_severity', 'pain_time', 'tooth_location', 'gender', 'is_pregnant', 'case_type', 'notes', 'age', 'chronic_diseases', 'previous_treatment', 'medicines', 'allow_portfolio'];
     for (const field of updatableFields) {
         if (req.body[field] !== undefined) {
             request[field] = req.body[field];
@@ -231,7 +230,7 @@ module.exports.getAllRequests = asyncHandler(async (req, res) => {
 
     let requests = await Pending_request.find(query)
         .populate('case_type', '_id case_type');
-        
+
 
     if (isAdmin) {
         requests = await Pending_request.find(query)
@@ -241,7 +240,7 @@ module.exports.getAllRequests = asyncHandler(async (req, res) => {
 
     // ✅ استخدام نفس التنسيق مع بيانات المريض للأدمن
     const formattedRequests = requests.map((request) => {
-        request.status='pending';
+        request.status = 'pending';
         formatRequestWithPatient(req, request, isAdmin);
         console.log(`request status is ${request.status}`)
     }

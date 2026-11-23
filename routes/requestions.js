@@ -1,7 +1,9 @@
 const express=require('express');
 const verifyToken = require('../Middlewares/verifyToken');
 const { createTreatmentRequest, getUserTreatmentRequests,  updateRequest, deleteRequest,  } = require('../controllers/patientController');
-const { uploadRequestPhoto } = require('../Middlewares/upload');
+const { uploadRequestPhoto, uploadCasePhotoSingle } = require('../Middlewares/upload');
+const { uploadCasePhoto } = require('../controllers/casePhotoController');
+const { setAppointment, respondToAppointmentChange } = require('../controllers/appointmentController');
 const { getCourseOverseers, acceptRequest, showAllRequests, reassignOverseer,} = require('../controllers/studentController');
 const {  getProcessingRequests, getFinishedRequests, getRejectedRequests } = require('../controllers/RequestController');
 const router=express.Router();
@@ -25,6 +27,13 @@ router.get('/rejected',verifyToken,getRejectedRequests);
 // the student  can accept requests
 router.post('/accept/:id/:overseer',verifyToken,acceptRequest)
 router.put('/reassign-overseer/:id/:overseer',verifyToken,reassignOverseer)
+
+// student uploads before/after photo for a case he accepted (which = before | after)
+router.put('/processing/:id/photo/:which',verifyToken,uploadCasePhotoSingle,uploadCasePhoto)
+
+// student sets appointment (or proposes a change); patient accepts/rejects the proposal
+router.put('/processing/:id/appointment',verifyToken,setAppointment)
+router.put('/processing/:id/appointment/respond',verifyToken,respondToAppointmentChange)
 
 //update the requests
 router.put('/:id',verifyToken,uploadRequestPhoto.single('photo'),updateRequest)

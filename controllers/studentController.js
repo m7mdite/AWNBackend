@@ -1,4 +1,6 @@
 const asyncHandler = require('express-async-handler');
+const mongoose = require('mongoose');
+const { notifyUser } = require('../utils/notifyUser');
 const StudentProfile = require('../models/Student_profile');
 const { Verify_request } = require('../models/VerifyRequest');
 const Course = require('../models/Course');
@@ -213,14 +215,28 @@ module.exports.acceptRequest = asyncHandler(async (req, res) => {
     delete requestData.updatedAt;
     delete requestData.__v;
 
-    const inProcess = await InProcess_request.create({
+    const inProcessData = {
         patient: request.user,
         student: studentId,
         Requestion: requestData,
         case_type: request.case_type,
         overseer: overseerId,
         date_of_accepting: new Date()
-    });
+    };
+
+    // صورة المريض الاختيارية تصير "صورة قبل المعالجة"
+    if (requestData.photo?.url) {
+        inProcessData.photos = {
+            before: {
+                url: requestData.photo.url,
+                uploaded_by: request.user,
+                role: 'patient',
+                uploaded_at: request.createdAt || new Date()
+            }
+        };
+    }
+
+    const inProcess = await InProcess_request.create(inProcessData);
 
     const io = socket.getIO();
     if (io) {
@@ -244,7 +260,7 @@ module.exports.acceptRequest = asyncHandler(async (req, res) => {
 
 /**
  * @description Reassign overseer to request after case type change
- * @route PUT /api/student/reassign-overseer/:id/:overseerId
+ * @route PUT /api/request/reassign-overseer/:id/:overseer
  * @access Private (Student only)
  */
 module.exports.reassignOverseer = asyncHandler(async (req, res) => {
@@ -258,7 +274,14 @@ module.exports.reassignOverseer = asyncHandler(async (req, res) => {
         });
     }
 
-    const request = await InProcess.findOne({ _id: requestId, student: studentId });
+    if (!mongoose.isValidObjectId(requestId) || !mongoose.isValidObjectId(overseerId)) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'معرّف الطلب أو المشرف غير صحيح'
+        });
+    }
+
+    const request = await InProcess_request.findOne({ _id: requestId, student: studentId });
     if (!request) {
         return res.status(404).json({
             status: 'error',
@@ -273,12 +296,51 @@ module.exports.reassignOverseer = asyncHandler(async (req, res) => {
         });
     }
 
+    // المشرف لازم يكون مسؤولاً عن فئة الطالب في مقرر نوع الحالة الحالي (بعد التغيير)
+    const student = await StudentProfile.findOne({ user: studentId });
+    const treatment = await Treatment.findById(request.case_type);
+    if (!student || !treatment) {
+        return res.status(404).json({
+            status: 'error',
+            message: 'تعذر تحديد مقرر هذه الحالة'
+        });
+    }
+
+    const lesson = await Practial_lesson.findOne({
+        course: treatment.course,
+        category: student.category
+    });
+    if (!lesson || !lesson.overseers.some((o) => String(o) === String(overseerId))) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'المشرف الذي اخترته غير مسؤول عن فئتك في مقرر هذه الحالة'
+        });
+    }
+
     request.overseer = overseerId;
     await request.save();
 
+    notifyUser(
+        overseerId,
+        'حالة جديدة بانتظارك',
+        `اختارك الطالب ${student.first_name || ''} ${student.last_name || ''} مشرفاً على حالة (${treatment.case_type})`
+    );
+
+    const overseerProfile = await Overseer_profile.findOne({ user: overseerId })
+        .select('first_name father_name last_name')
+        .lean();
+
     res.status(200).json({
         status: 'success',
-        message: 'تم تعيين المشرف الجديد بنجاح، الطلب الآن قيد المراجعة',
-        data: request
+        message: 'تم تعيين المشرف بنجاح، الحالة الآن قيد المراجعة',
+        data: {
+            overseer: overseerProfile
+                ? {
+                    first_name: overseerProfile.first_name,
+                    father_name: overseerProfile.father_name,
+                    last_name: overseerProfile.last_name
+                }
+                : null
+        }
     });
 });

@@ -7,6 +7,7 @@ const asyncHandler = require('express-async-handler');
 const Treatment = require('../models/Treatment');
 const { Practial_lesson } = require('../models/Practical_lesson');
 const socket = require('../socket/init');
+const { notifyUser } = require('../utils/notifyUser');
 const { getRequestsByStatus } = require('../utils/requestHelper');
 const InProcess_request = require('../models/InProcess_request');
 const Finished_request = require('../models/Finished_request');
@@ -81,12 +82,34 @@ module.exports.completeRequest = asyncHandler(async (req, res) => {
         });
     }
 
+    // ===== شروط الصور قبل الإنهاء =====
+    const photos = request.toObject().photos || {};
+    if (!photos.before?.url) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'لا يمكن إنهاء الحالة: صورة السن قبل المعالجة غير موجودة (يرفعها المريض أو الطالب)'
+        });
+    }
+    if (!photos.after?.url) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'لا يمكن إنهاء الحالة: على الطالب رفع صورة بعد المعالجة أولاً'
+        });
+    }
+    if (request.retake_request?.which) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'يوجد طلب إعادة تصوير معلّق، بانتظار رفع الطالب للصورة الجديدة'
+        });
+    }
+
     const finishedRequest = await Finished_request.create({
         patient: request.patient,
         overseer: overseerId,
         Requestion: request.Requestion,
         student: request.student,
         case_type: request.case_type,
+        photos: { before: photos.before, after: photos.after },
         rating,
         feedback,
         completedAt: Date.now()
@@ -259,14 +282,14 @@ module.exports.rejectRequestWithOption = asyncHandler(async (req, res) => {
         const studentId = request.student.toString();
 
         if (lesson) {
-            io.to(patientId).emit('updateCaseType', {
+            io.to(patientId).emit('updatecasetype', {
                 message: `تم تغيير موعد معالجتك إلى موعد آخر في القاعة ${lesson.hall}`,
                 time: lesson.time,
                 location: lesson.hall
             });
         }
 
-        io.to(studentId).emit('updateCaseType', {
+        io.to(studentId).emit('updatecasetype', {
             message: `تم تغيير نوع المعالجة إلى ${treatment.case_type}، يتوجب عليك تعيين مشرف جديد`,
             treatment
         });
@@ -314,15 +337,107 @@ module.exports.addStageEvaluation = asyncHandler(async (req, res) => {
         });
     }
 
+    // لا تقييم مرحلي قبل وجود صورة السن قبل المعالجة
+    if (!request.toObject().photos?.before?.url) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'لا يمكن إضافة تقييم مرحلي قبل وجود صورة السن قبل المعالجة (يرفعها المريض أو الطالب)'
+        });
+    }
+
     request.stage_evaluations.push({
         text: evaluationText.trim(),
         date: new Date()
     });
+    // بعد كل تقييم مرحلي على الطالب تحديد موعد المراجعة القادمة
+    request.set('appointment.needs_next', true);
     await request.save();
+
+    notifyUser(
+        request.student,
+        'تقييم مرحلي جديد',
+        'أضاف المشرف تقييماً مرحلياً لحالتك. حدد موعد المراجعة القادمة للمريض.'
+    );
 
     res.status(200).json({
         status: 'success',
         message: 'تم إضافة التقييم المرحلي بنجاح',
         data: request.stage_evaluations
+    });
+});
+
+// ============================================================
+// 📸 REQUEST PHOTO RETAKE (طلب إعادة تصوير)
+// ============================================================
+
+/**
+ * @description Overseer asks the student to retake the before/after photo
+ * @route PUT /api/overseer/treatment/request-retake/:id
+ * @body { which: 'before' | 'after', note: String }
+ * @access Private (Overseer only)
+ */
+module.exports.requestPhotoRetake = asyncHandler(async (req, res) => {
+    const { id: requestId } = req.params;
+    const { which, note } = req.body;
+    const overseerId = req.user.id;
+
+    if (req.user.role !== 'overseer') {
+        return res.status(403).json({
+            status: 'error',
+            message: 'غير مسموح، هذه الخدمة للمشرفين فقط'
+        });
+    }
+
+    if (!['before', 'after'].includes(which)) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'حدد أي صورة تريد إعادة تصويرها (before أو after)'
+        });
+    }
+
+    if (!note || note.trim().length < 5) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'يرجى كتابة سبب إعادة التصوير (5 أحرف على الأقل)'
+        });
+    }
+
+    const request = await InProcess_request.findOne({ _id: requestId, overseer: overseerId });
+    if (!request) {
+        return res.status(404).json({
+            status: 'error',
+            message: 'الطلب غير موجود أو أنك لست المشرف المسؤول عنه'
+        });
+    }
+
+    const photos = request.toObject().photos || {};
+    if (!photos[which]?.url) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'لا توجد صورة لطلب إعادة تصويرها'
+        });
+    }
+
+    // صورة قبل المعالجة تُقفل بعد أول تقييم مرحلي (قيمتها كدليل)
+    if (which === 'before' && request.stage_evaluations.length > 0) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'لا يمكن طلب إعادة تصوير صورة قبل المعالجة بعد بدء التقييم المرحلي'
+        });
+    }
+
+    request.retake_request = { which, note: note.trim(), by: overseerId, date: new Date() };
+    await request.save();
+
+    notifyUser(
+        request.student,
+        'طلب إعادة تصوير',
+        `طلب المشرف إعادة تصوير الصورة (${which === 'before' ? 'قبل المعالجة' : 'بعد المعالجة'}): ${note.trim()}`
+    );
+
+    res.status(200).json({
+        status: 'success',
+        message: 'تم إرسال طلب إعادة التصوير للطالب',
+        data: { retake_request: request.toObject().retake_request }
     });
 });

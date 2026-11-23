@@ -29,6 +29,8 @@ const formatRequestResponse = (req, request) => {
             previous_treatment: request.previous_treatment,
             medicines: request.medicines,
             chronic_diseases: request.chronic_diseases,
+            allow_portfolio: request.allow_portfolio === true,
+
             notes: request.notes,
         },
         // التعديل هنا - استخدم request بدلاً من req

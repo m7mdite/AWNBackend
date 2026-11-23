@@ -2,19 +2,25 @@ const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
 const http = require('http');
+const cors = require('cors');
 const userRoutes = require('./routes/users');
 const socket = require('./socket/init');
 
+const helmet = require('helmet');
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
-
+const corsOptions = {
+  origin: 'http://localhost:8080',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // فعّلها إذا كنت ترسل cookies أو credentials
+};
+app.use(cors(corsOptions));
 // لدعم JSON
 app.use(express.json());
 app.use(express.static('public'));
-// في أعلى الملف مع باقي الاستيرادات
-const helmet = require('helmet');
 
 
 
@@ -51,6 +57,11 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
+app.use((err, req, res, next) => {
+  console.error('❌', req.method, req.originalUrl, err);
+  if (res.headersSent) return next(err);
+  res.status(err.status || 500).json({ status: 'error', message: err.message || 'خطأ داخلي في الخادم' });
+});
 // اتصال قاعدة البيانات
 require('./config/db')();
 
