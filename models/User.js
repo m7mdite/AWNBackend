@@ -25,7 +25,21 @@ const UserSchema = new mongoose.Schema({
     default: false
   },
 
-}, { timestamps: true }); // Automatically adds createdAt and updatedAt
+  // ===== حالة الحساب (الإشراف) =====
+  status: {
+    type: String,
+    enum: ['active', 'suspended', 'banned'],
+    default: 'active'
+  },
+  suspendedUntil: { type: Date },
+  banReason: { type: String, maxlength: 300 },
+  statusChangedAt: { type: Date },
+  statusChangedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+}, { timestamps: true });
+
+
+
 // 🔐 Generate JWT Token
 UserSchema.methods.generateToken = function () {
   return jwt.sign(

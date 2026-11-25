@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');
 const { notifyUser } = require('../utils/notifyUser');
+const { getBlockedUserIds } = require('../utils/accountStatus');
 const StudentProfile = require('../models/Student_profile');
 const { Verify_request } = require('../models/VerifyRequest');
 const Course = require('../models/Course');
@@ -79,8 +80,12 @@ module.exports.getCourseOverseers = asyncHandler(async (req, res) => {
 
     const course = await Course.findById(lesson.course);
     console.log(lesson.overseers);
+    // نخفي المشرفين الموقوفين/المحظورين من قائمة الاختيار
+    const blocked = await getBlockedUserIds(lesson.overseers);
+    const availableIds = lesson.overseers.filter((o) => !blocked.has(String(o)));
+
     const overseers = await Overseer_profile.find({
-        user: { $in: lesson.overseers }
+        user: { $in: availableIds }
     }).select('first_name father_name last_name user profile_photo');
 
     overseers.map(overseer => {
@@ -205,6 +210,14 @@ module.exports.acceptRequest = asyncHandler(async (req, res) => {
         });
     }
 
+    // لا يمكن اختيار مشرف موقوف أو محظور
+    if ((await getBlockedUserIds([overseerId])).size > 0) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'هذا المشرف غير متاح حالياً، اختر مشرفاً آخر'
+        });
+    }
+
     await Pending_request.findByIdAndDelete(id);
 
     const requestData = request.toObject();
@@ -314,6 +327,13 @@ module.exports.reassignOverseer = asyncHandler(async (req, res) => {
         return res.status(400).json({
             status: 'error',
             message: 'المشرف الذي اخترته غير مسؤول عن فئتك في مقرر هذه الحالة'
+        });
+    }
+
+    if ((await getBlockedUserIds([overseerId])).size > 0) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'هذا المشرف غير متاح حالياً، اختر مشرفاً آخر'
         });
     }
 

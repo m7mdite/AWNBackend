@@ -1,3 +1,4 @@
+
 age,gender,pain_severity,pain_time,tooth_location,is_pregnant,previous_treatment,medicines,chronic_diseases,notes,case_type,status
 22,male,9,night,18,false,false,,,,6a245cdce5e4159c8d00cb45,1
 25,female,7,evening,20,false,false,,,,6a245cdce5e4159c8d00cb45,1
@@ -35,3 +36,4 @@ age,gender,pain_severity,pain_time,tooth_location,is_pregnant,previous_treatment
 60,male,4,morning,18,false,false,,,,6a245cdce5e4159c8d00cb45,0
 65,male,2,evening,25,false,false,,,,6a245cdce5e4159c8d00cb45,0
 55,male,4,all,25,false,false,,,,6a245cdce5e4159c8d00cb45,0
+

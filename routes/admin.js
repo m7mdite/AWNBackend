@@ -8,7 +8,7 @@ const { createCourse, getCourses, addTreatment, getAllTreatments, deleteTreatmen
 const { adminUpdateInProcess } = require('../controllers/adminControllers/requestions_controller');
 const { notifyAll } = require('../controllers/adminControllers/notifyController');
 const { getStats } = require('../controllers/adminControllers/statsController');
-
+const { moderateUser, getModerationInfo, listAdminActions } = require('../controllers/adminControllers/moderationController');
 const router=express.Router();
 
 // قراءة بيانات مرجعية يحتاجها المرضى والطلاب والمشرفون (قوائم العلاجات والتصنيفات والمقررات والجدول):
@@ -56,5 +56,9 @@ router.post('/notify',notifyAll)
 
 // stats (إحصاءات لوحة الأدمن)
 router.get('/stats',getStats)
+// moderation (حظر/إيقاف/تحذير) وسجل الإجراءات
+router.get('/users/:id/moderation',getModerationInfo)
+router.put('/users/:id/moderation',moderateUser)
+router.get('/actions',listAdminActions)
 
 module.exports=router

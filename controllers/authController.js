@@ -1,4 +1,6 @@
 const asyncHandler = require('express-async-handler');
+const { getBlockInfo } = require('../utils/accountStatus');
+
 const bcrypt = require('bcrypt');
 const { validateUserRegister, validateUserLogin, User } = require('../models/User');
 const getUserProfile = require('../utils/users');
@@ -88,9 +90,20 @@ module.exports.loginUser = asyncHandler(async (req, res) => {
         });
     }
 
+    // حساب محظور أو موقوف: نمنع الدخول برسالة واضحة (بعد التحقق من كلمة المرور)
+    const block = getBlockInfo(user);
+    if (block) {
+        return res.status(403).json({
+            status: 'error',
+            code: block.type === 'banned' ? 'ACCOUNT_BANNED' : 'ACCOUNT_SUSPENDED',
+            message: block.message
+        });
+    }
+
     const profile = await getUserProfile(user._id, user.role);
 
     if (!profile) {
+
         return res.status(404).json({
             status: 'error',
             message: 'الملف الشخصي غير موجود'
